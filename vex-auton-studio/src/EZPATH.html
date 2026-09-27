@@ -1,0 +1,4875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>EZPATH — V5RC Autonomous Planner</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #080a0d;
+    color: #e7ebf0;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: hidden;
+}
+
+/* =========================
+   TOP BAR
+========================= */
+
+.topbar {
+    height: 54px;
+
+    background: #101318;
+    border-bottom: 1px solid #292f37;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 15px;
+    gap: 12px;
+}
+
+.logo {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.logo span {
+    color: #6c9cff;
+}
+
+.game {
+    color: #8b95a1;
+    font-size: 12px;
+
+    border: 1px solid #303741;
+    border-radius: 6px;
+
+    padding: 5px 9px;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.topbar button {
+    background: #181d23;
+    border: 1px solid #303741;
+
+    color: #e0e5eb;
+
+    padding: 7px 10px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+}
+
+.topbar button:hover {
+    background: #242a32;
+}
+
+.primary {
+    background: #386fd2 !important;
+    border-color: #5184e4 !important;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+.main {
+    height: calc(100vh - 54px);
+
+    display: grid;
+
+    grid-template-columns:
+        235px
+        minmax(500px, 1fr)
+        275px;
+}
+
+
+/* =========================
+   SIDEBARS
+========================= */
+
+.sidebar {
+    background: #11151a;
+    overflow-y: auto;
+}
+
+.left {
+    border-right: 1px solid #292f37;
+}
+
+.right {
+    border-left: 1px solid #292f37;
+}
+
+.section {
+    padding: 13px;
+    border-bottom: 1px solid #272d34;
+}
+
+.title {
+    color: #7d8793;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: .12em;
+    text-transform: uppercase;
+
+    margin-bottom: 9px;
+}
+
+button {
+    font: inherit;
+}
+
+.full {
+    width: 100%;
+
+    padding: 8px;
+
+    background: #191f26;
+
+    border: 1px solid #303741;
+    border-radius: 6px;
+
+    color: #e5e9ee;
+
+    cursor: pointer;
+}
+
+.full:hover {
+    background: #222931;
+}
+
+
+/* =========================
+   PATH LIST
+========================= */
+
+.path {
+    display: flex;
+    align-items: center;
+
+    padding: 8px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    margin-bottom: 3px;
+}
+
+.path:hover {
+    background: #1a2027;
+}
+
+.path.selected {
+    background: #222d3d;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    margin-right: 8px;
+}
+
+.path-name {
+    flex: 1;
+}
+
+.path-count {
+    color: #727c88;
+    font-size: 10px;
+}
+
+
+/* =========================
+   INPUTS
+========================= */
+
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+}
+
+label {
+    display: block;
+
+    color: #7d8793;
+
+    font-size: 10px;
+
+    margin-bottom: 4px;
+}
+
+input,
+select {
+    width: 100%;
+
+    padding: 7px;
+
+    background: #0b0e12;
+
+    border: 1px solid #303741;
+
+    border-radius: 5px;
+
+    color: white;
+
+    outline: none;
+}
+
+input:focus,
+select:focus {
+    border-color: #5782cf;
+}
+
+
+/* =========================
+   FIELD
+========================= */
+
+.field {
+    position: relative;
+
+    background: #07090c;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+canvas {
+    display: block;
+
+    touch-action: none;
+}
+
+.help {
+    position: absolute;
+
+    bottom: 10px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    padding: 6px 10px;
+
+    background: #10151ddd;
+
+    border: 1px solid #303741;
+    border-radius: 6px;
+
+    color: #818b97;
+
+    font-size: 11px;
+
+    pointer-events: none;
+}
+
+.zoom {
+    position: absolute;
+
+    right: 10px;
+    bottom: 10px;
+
+    display: flex;
+
+    gap: 5px;
+}
+
+.zoom button {
+    width: 32px;
+    height: 32px;
+
+    background: #171c22;
+
+    border: 1px solid #303741;
+
+    border-radius: 5px;
+
+    color: white;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   PROPERTIES
+========================= */
+
+.properties {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 7px;
+}
+
+.hidden {
+    display: none;
+}
+
+.muted {
+    color: #7d8793;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+.action {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 7px;
+
+    background: #0c1014;
+
+    border: 1px solid #293039;
+
+    border-radius: 5px;
+
+    margin-bottom: 5px;
+
+    font-size: 11px;
+}
+
+.action button {
+    background: #181e24;
+
+    border: 1px solid #303741;
+
+    border-radius: 4px;
+
+    color: white;
+
+    padding: 3px 6px;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   EXTENDED PLANNER FEATURES — additive styles
+============================================================ */
+.feature-row{display:flex;gap:6px;margin-top:7px}
+.feature-row button{flex:1}
+.feature-btn{background:#191f26;border:1px solid #303741;border-radius:5px;color:#e5e9ee;padding:7px;cursor:pointer}
+.feature-btn:hover{background:#242a32}
+.feature-btn.primary-feature{background:#386fd2;border-color:#5184e4}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:1000}
+.feature-modal{width:min(900px,92vw);height:min(720px,88vh);background:#11151a;border:1px solid #303741;border-radius:9px;box-shadow:0 20px 70px rgba(0,0,0,.55);display:flex;flex-direction:column;overflow:hidden}
+.feature-modal-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #292f37}
+.feature-modal-head strong{font-size:13px}
+.feature-modal-head .modal-spacer{flex:1}
+.feature-modal button{background:#181d23;border:1px solid #303741;color:#e0e5eb;border-radius:5px;padding:6px 9px;cursor:pointer}
+.feature-modal button:hover{background:#242a32}
+.feature-modal-body{padding:12px;overflow:auto;flex:1}
+.feature-modal textarea{width:100%;height:100%;min-height:430px;background:#090c10;color:#dce5ef;border:1px solid #303741;border-radius:6px;padding:12px;font:12px/1.5 Consolas,monospace;resize:none;outline:none}
+.code-tabs{display:flex;gap:6px;margin-bottom:9px}
+.code-tabs button.active{background:#386fd2;border-color:#5184e4}
+.sim-overlay{position:absolute;top:10px;left:10px;z-index:10;background:#10151ddd;border:1px solid #303741;border-radius:6px;padding:8px;font-size:11px;display:flex;gap:8px;align-items:center}
+.sim-overlay button{background:#181e24;border:1px solid #303741;color:#fff;border-radius:4px;padding:5px 8px;cursor:pointer}
+.sim-overlay .sim-status{color:#8e9baa;min-width:120px}
+.timeline-item{padding:7px;background:#0c1014;border:1px solid #293039;border-radius:5px;margin-bottom:5px;font-size:11px;cursor:pointer}
+.timeline-item:hover{background:#171d24}
+.timeline-item.selected{border-color:#5782cf;background:#182235}
+.timeline-time{color:#718092;font-size:10px;margin-left:5px}
+.path-actions{display:flex;gap:5px;margin-top:7px}
+.path-actions button{flex:1}
+.toast{position:fixed;right:16px;bottom:16px;background:#171d24;border:1px solid #3a444f;color:#e7ebf0;border-radius:6px;padding:9px 12px;font-size:11px;z-index:1100;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.kbd{font-family:monospace;border:1px solid #39414b;border-bottom-width:2px;border-radius:4px;padding:1px 4px;color:#aeb8c4}
+
+
+/* ============================================================
+   EZPATH UI OVERHAUL
+   Keeps the existing planner logic/IDs intact.
+   ============================================================ */
+
+:root{
+    --bg:#07090d;
+    --panel:#0d1117;
+    --panel-2:#111720;
+    --panel-3:#151c25;
+    --line:#27313d;
+    --line-soft:#1d2630;
+    --text:#edf2f7;
+    --muted:#8793a1;
+    --accent:#6d9dff;
+    --accent-2:#3e73df;
+    --good:#52d19a;
+    --danger:#f06473;
+    --shadow:0 14px 45px rgba(0,0,0,.28);
+}
+
+html,body{background:var(--bg);color:var(--text)}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;overflow:hidden}
+button,input,select,textarea{font:inherit}
+
+/* Top navigation */
+.topbar{
+    height:64px;
+    padding:0 18px;
+    gap:12px;
+    background:rgba(10,14,19,.94);
+    border-bottom:1px solid var(--line);
+    box-shadow:0 8px 28px rgba(0,0,0,.18);
+    position:relative;
+    z-index:30;
+}
+.logo{
+    font-size:20px;
+    letter-spacing:-.04em;
+    font-weight:900;
+    min-width:94px;
+}
+.logo span{color:var(--accent)}
+.game{
+    color:#a3afbc;
+    background:#111720;
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:6px 10px;
+    font-size:10px;
+    letter-spacing:.09em;
+    font-weight:700;
+}
+.workspace-tools{display:flex;gap:5px}
+.view-btn{
+    background:#111720!important;
+    border:1px solid var(--line)!important;
+    color:#cbd4df!important;
+    padding:7px 10px!important;
+    border-radius:8px!important;
+}
+.view-btn:hover{background:#19212c!important;border-color:#3a4654!important}
+.view-btn.active{background:#1b2d4c!important;border-color:#4d7fd7!important;color:#fff!important}
+.topbar button{
+    border-radius:8px;
+    transition:.16s ease;
+}
+.topbar button:hover{transform:translateY(-1px)}
+.primary{box-shadow:0 5px 18px rgba(62,115,223,.25)}
+
+/* Main layout */
+.main{
+    height:calc(100vh - 64px);
+    grid-template-columns:290px minmax(520px,1fr) 330px;
+    gap:0;
+    transition:grid-template-columns .22s ease;
+}
+.main.left-collapsed{grid-template-columns:0 minmax(520px,1fr) 330px}
+.main.right-collapsed{grid-template-columns:290px minmax(520px,1fr) 0}
+.main.left-collapsed.right-collapsed{grid-template-columns:0 minmax(520px,1fr) 0}
+
+.sidebar{
+    background:linear-gradient(180deg,#0d1218,#0b1015);
+    scrollbar-width:thin;
+    scrollbar-color:#303b48 transparent;
+    transition:opacity .18s ease;
+}
+.main.left-collapsed .left,.main.right-collapsed .right{
+    opacity:0;
+    pointer-events:none;
+    overflow:hidden;
+}
+.left{border-right:1px solid var(--line);box-shadow:inset -1px 0 rgba(255,255,255,.015)}
+.right{border-left:1px solid var(--line);box-shadow:inset 1px 0 rgba(255,255,255,.015)}
+
+.section{
+    padding:16px;
+    border-bottom:1px solid var(--line-soft);
+}
+.section:first-child{padding-top:17px}
+.title{
+    color:#9aa7b5;
+    font-size:10px;
+    letter-spacing:.13em;
+    margin-bottom:11px;
+}
+.title:before{
+    content:"";
+    display:inline-block;
+    width:4px;height:4px;
+    border-radius:50%;
+    background:var(--accent);
+    margin:0 7px 2px 0;
+}
+.full,.feature-btn{
+    background:#121922;
+    border:1px solid #2a3541;
+    border-radius:8px;
+    color:#e7edf4;
+    min-height:36px;
+    transition:.16s ease;
+}
+.full:hover,.feature-btn:hover{background:#19232e;border-color:#3a4857}
+.full:active,.feature-btn:active{transform:scale(.98)}
+#newPath{
+    background:linear-gradient(180deg,#356bd0,#2b5ebd);
+    border-color:#4c80df;
+    font-weight:750;
+    box-shadow:0 7px 20px rgba(48,103,211,.18);
+}
+
+/* Path list */
+.path{
+    padding:10px;
+    margin-bottom:5px;
+    border:1px solid transparent;
+    border-radius:9px;
+    min-height:42px;
+}
+.path:hover{background:#141c25;border-color:#26313d}
+.path.selected{
+    background:linear-gradient(90deg,#172741,#142033);
+    border-color:#36557e;
+    box-shadow:inset 3px 0 var(--accent);
+}
+.path-name{font-weight:650;font-size:12px}
+.path-count{
+    background:#19222c;
+    border:1px solid #2c3743;
+    border-radius:999px;
+    min-width:23px;
+    text-align:center;
+    padding:2px 5px;
+}
+.path-actions{margin-top:8px}
+.path-actions button{min-height:31px;font-size:10px}
+
+/* Forms */
+.grid2,.properties,.feature-grid{gap:9px}
+label{color:#8d99a7;font-size:10px;font-weight:650;letter-spacing:.02em}
+input,select{
+    background:#080c11;
+    border:1px solid #2a3540;
+    border-radius:8px;
+    min-height:35px;
+    padding:8px 9px;
+    color:#f1f5f9;
+    transition:.15s ease;
+}
+input:hover,select:hover{border-color:#3a4654}
+input:focus,select:focus{
+    border-color:#5c88dc;
+    box-shadow:0 0 0 3px rgba(92,136,220,.12);
+}
+.muted{color:#8793a1;font-size:11px;line-height:1.65}
+
+/* Robot color controls */
+#red,#blue{position:relative}
+#red:before,#blue:before{
+    content:"";
+    display:inline-block;
+    width:7px;height:7px;border-radius:50%;
+    margin-right:7px;
+    vertical-align:1px;
+}
+#red:before{background:#ed4d60;box-shadow:0 0 8px rgba(237,77,96,.45)}
+#blue:before{background:#4d89ef;box-shadow:0 0 8px rgba(77,137,239,.45)}
+
+/* Canvas workspace */
+.field{
+    background:
+      radial-gradient(circle at center,rgba(63,84,112,.10),transparent 42%),
+      #070a0e;
+}
+.field:after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    box-shadow:inset 0 0 90px rgba(0,0,0,.30);
+}
+.field-chrome{
+    position:absolute;
+    top:13px;left:13px;right:13px;
+    z-index:8;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    pointer-events:none;
+}
+.field-title,.field-shortcuts{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(10,14,19,.82);
+    border:1px solid #2a3540;
+    border-radius:9px;
+    padding:7px 10px;
+    backdrop-filter:blur(8px);
+    box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+.field-title{font-size:10px;letter-spacing:.08em}
+.field-title span:last-child{color:#7e8b99;font-weight:500;letter-spacing:0}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--good);box-shadow:0 0 9px rgba(82,209,154,.55)}
+.field-shortcuts{font-size:9px;color:#8793a1}
+kbd{
+    font:700 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    padding:3px 5px;
+    border:1px solid #394654;
+    border-bottom-width:2px;
+    border-radius:4px;
+    color:#b8c4d1;
+    background:#121922;
+}
+.help{
+    bottom:14px;
+    background:rgba(10,14,19,.86);
+    border-color:#2a3540;
+    border-radius:999px;
+    padding:7px 12px;
+}
+.zoom{
+    right:14px;bottom:14px;
+    background:rgba(10,14,19,.82);
+    border:1px solid #2a3540;
+    border-radius:9px;
+    padding:4px;
+    backdrop-filter:blur(8px);
+}
+.zoom button{
+    width:34px;height:32px;
+    border-radius:6px;
+    background:#131a22;
+    border-color:#2b3743;
+}
+
+/* Inspector */
+#pointPanel{
+    background:#0a0f15;
+    border:1px solid #202b36;
+    border-radius:10px;
+    padding:11px;
+}
+#pointPanel .properties{margin:0}
+.action,.timeline-item{
+    background:#0b1117;
+    border-color:#26323e;
+    border-radius:8px;
+}
+.action:hover,.timeline-item:hover{background:#111923}
+.action button{
+    border-radius:6px;
+    padding:5px 8px;
+}
+.hidden{display:none!important}
+
+/* Extended feature modals */
+.feature-modal{
+    width:min(980px,92vw);
+    height:min(760px,90vh);
+    background:#0d1218;
+    border:1px solid #34404d;
+    border-radius:14px;
+    box-shadow:0 28px 100px rgba(0,0,0,.65);
+}
+.feature-modal-head{padding:14px 16px;background:#101720}
+.feature-modal-head strong{font-size:14px}
+.feature-modal-body{padding:16px}
+.feature-modal textarea{background:#070b10;border-radius:9px}
+.code-tabs button.active{box-shadow:0 5px 16px rgba(62,115,223,.22)}
+.sim-overlay{top:13px;left:13px;border-radius:9px;backdrop-filter:blur(8px)}
+.toast{border-radius:9px;padding:10px 13px}
+
+/* Better scrollbars */
+.sidebar::-webkit-scrollbar,.feature-modal-body::-webkit-scrollbar{width:7px}
+.sidebar::-webkit-scrollbar-thumb,.feature-modal-body::-webkit-scrollbar-thumb{
+    background:#2b3541;border-radius:10px;
+}
+
+/* Responsive: turn sidebars into overlay drawers rather than crushing the field */
+@media (max-width:1100px){
+    .main{grid-template-columns:250px minmax(0,1fr) 285px}
+    .game{display:none}
+    .field-shortcuts{display:none}
+}
+@media (max-width:820px){
+    body{overflow:auto}
+    .topbar{height:auto;min-height:60px;flex-wrap:wrap;padding:10px}
+    .topbar .spacer{display:none}
+    .topbar #save,.topbar #load,.topbar #showCode,.topbar .primary{font-size:0;padding:8px 10px}
+    .topbar #save:before{content:"💾";font-size:14px}
+    .topbar #load:before{content:"↥";font-size:14px}
+    .topbar #showCode:before{content:"</>";font-size:13px}
+    .main,.main.left-collapsed,.main.right-collapsed,.main.left-collapsed.right-collapsed{
+        height:calc(100vh - 60px);
+        grid-template-columns:minmax(0,1fr);
+        position:relative;
+    }
+    .sidebar{
+        position:absolute;
+        top:0;bottom:0;
+        width:min(320px,88vw);
+        z-index:20;
+        box-shadow:0 18px 50px rgba(0,0,0,.55);
+    }
+    .left{left:0}
+    .right{right:0}
+    .main.left-collapsed .left{transform:translateX(-105%)}
+    .main.right-collapsed .right{transform:translateX(105%)}
+    .main:not(.left-collapsed) .left{transform:translateX(0)}
+    .main:not(.right-collapsed) .right{transform:translateX(0)}
+    .field{grid-column:1}
+    .field-chrome{top:10px}
+    .help{display:none}
+}
+
+
+/* ============================================================
+   EZPATH CLEAN UI LAYER
+   Presentation-only improvements; existing planner logic stays.
+============================================================ */
+:root{
+  --clean-bg:#080b0f;
+  --clean-panel:#0d1218;
+  --clean-panel2:#111821;
+  --clean-panel3:#151e28;
+  --clean-line:#26313d;
+  --clean-line2:#1b242d;
+  --clean-text:#e9eef4;
+  --clean-muted:#83909e;
+  --clean-accent:#5f8fe9;
+  --clean-accent-bg:#182844;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--clean-bg);
+  color:var(--clean-text);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+.topbar{
+  height:58px!important;
+  padding:0 14px!important;
+  gap:7px!important;
+  background:#0c1116!important;
+  border-bottom:1px solid var(--clean-line)!important;
+  box-shadow:none!important;
+}
+.logo{font-size:18px!important;min-width:auto!important;margin-right:2px}
+.game{font-size:9px!important;padding:5px 8px!important}
+.workspace-tools{gap:4px!important}
+.view-btn{padding:6px 8px!important;border-radius:6px!important}
+.topbar button{padding:6px 9px!important;border-radius:6px!important}
+.top-button{
+  display:inline-flex;align-items:center;justify-content:center;
+  text-decoration:none;color:#cbd4df;
+  min-height:31px;
+}
+.main{
+  height:calc(100vh - 58px)!important;
+  grid-template-columns:255px minmax(520px,1fr) 290px!important;
+}
+.main.left-collapsed{grid-template-columns:0 minmax(520px,1fr) 290px!important}
+.main.right-collapsed{grid-template-columns:255px minmax(520px,1fr) 0!important}
+.main.left-collapsed.right-collapsed{grid-template-columns:0 minmax(520px,1fr) 0!important}
+.sidebar{
+  background:#0c1117!important;
+  box-shadow:none!important;
+  scrollbar-width:thin;
+}
+.left{border-right:1px solid var(--clean-line)!important}
+.right{border-left:1px solid var(--clean-line)!important}
+.section{
+  padding:12px!important;
+  border-bottom:1px solid var(--clean-line2)!important;
+}
+.section:first-child{padding-top:13px!important}
+.title{
+  color:#94a0ad!important;
+  font-size:9px!important;
+  margin-bottom:8px!important;
+  letter-spacing:.12em!important;
+}
+.title:before{width:3px!important;height:3px!important;margin-right:6px!important}
+.full,.feature-btn{
+  min-height:32px!important;
+  padding:6px 8px!important;
+  background:#121922!important;
+  border:1px solid #2a3540!important;
+  border-radius:6px!important;
+  box-shadow:none!important;
+}
+#newPath{background:#315fae!important;border-color:#4777c7!important}
+.path{
+  min-height:38px!important;
+  padding:7px 8px!important;
+  margin-bottom:3px!important;
+  border-radius:6px!important;
+}
+.path.selected{
+  background:#17253a!important;
+  border-color:#304d74!important;
+  box-shadow:inset 2px 0 var(--clean-accent)!important;
+}
+.path-name{font-size:11px!important}
+.path-count{font-size:9px!important;min-width:21px!important}
+.grid2,.properties,.feature-grid{gap:7px!important}
+label{font-size:9px!important;margin-bottom:3px!important}
+input,select{
+  min-height:31px!important;
+  padding:6px 7px!important;
+  border-radius:5px!important;
+  background:#090d12!important;
+  border-color:#29343f!important;
+}
+.muted{font-size:10px!important;line-height:1.5!important}
+.field{
+  background:#080b0f!important;
+  isolation:isolate;
+}
+.field:after{box-shadow:inset 0 0 70px rgba(0,0,0,.25)!important}
+.field-chrome{top:10px!important;left:10px!important;right:10px!important}
+.field-title,.field-shortcuts{
+  border-radius:6px!important;
+  padding:5px 8px!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+.field-title{font-size:9px!important}
+.field-shortcuts{font-size:8px!important}
+.help{bottom:10px!important;padding:5px 9px!important;font-size:9px!important}
+.zoom{right:10px!important;bottom:10px!important;padding:3px!important}
+.zoom button{width:30px!important;height:29px!important}
+#pointPanel{
+  padding:9px!important;
+  border-radius:7px!important;
+  background:#0a0f14!important;
+}
+.action,.timeline-item{
+  padding:6px!important;
+  border-radius:6px!important;
+}
+.feature-modal{border-radius:9px!important}
+.feature-modal-head{padding:11px 13px!important}
+.feature-modal-body{padding:12px!important}
+
+/* New compact controls */
+.workspace-grid,.quick-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.workspace-grid .feature-btn,.quick-grid .feature-btn{
+  min-height:29px!important;
+  font-size:10px;
+}
+.small-note{margin-top:7px;font-size:9px!important}
+.stats-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.stat{
+  background:#0a0f14;
+  border:1px solid #202b35;
+  border-radius:6px;
+  padding:7px 8px;
+}
+.stat strong{display:block;font-size:13px;color:#eaf0f6}
+.stat span{display:block;margin-top:2px;font-size:8px;color:#778492;text-transform:uppercase;letter-spacing:.06em}
+.path-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:-1px 0 8px;
+  padding:6px 8px;
+  background:#0a0f14;
+  border:1px solid #202b35;
+  border-radius:6px;
+}
+.path-meta-name{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.path-meta-status{font-size:9px;color:#788594;white-space:nowrap}
+.field-toolbar{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:9;
+  display:flex;
+  align-items:center;
+  gap:3px;
+  padding:3px;
+  background:rgba(10,14,19,.92);
+  border:1px solid #29343f;
+  border-radius:7px;
+}
+.field-tool{
+  border:0;
+  background:transparent;
+  color:#8d9aa8;
+  padding:5px 8px;
+  border-radius:5px;
+  font-size:9px;
+  cursor:pointer;
+}
+.field-tool:hover{background:#151e28;color:#dbe3eb}
+.field-tool.active{background:#1b2d4c;color:#fff}
+.field-divider{width:1px;height:18px;background:#2a3540;margin:0 2px}
+.coords-readout{
+  min-width:105px;
+  padding:5px 7px;
+  color:#7f8c9a;
+  font:9px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.grid-overlay{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:2;
+  opacity:.18;
+  background-image:
+    linear-gradient(to right,rgba(150,170,195,.15) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(150,170,195,.15) 1px,transparent 1px);
+  background-size:36px 36px;
+  display:none;
+}
+.grid-overlay.on{display:block}
+@media(max-width:1100px){
+  .main{grid-template-columns:230px minmax(0,1fr) 270px!important}
+}
+
+
+.segment-mode-box{
+  margin:0 0 10px;
+  padding:9px;
+  background:#0a0f14;
+  border:1px solid #26313d;
+  border-radius:7px;
+}
+.segment-mode-label{
+  color:#dce4ec;
+  font-size:10px;
+  font-weight:700;
+  margin-bottom:7px;
+}
+.segment-mode-buttons{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.segment-mode-btn{
+  min-height:30px;
+  border:1px solid #2a3540;
+  background:#121922;
+  color:#9aa6b3;
+  border-radius:5px;
+  cursor:pointer;
+  font-size:10px;
+}
+.segment-mode-btn:hover{background:#17212c;color:#e8eef5}
+.segment-mode-btn.active{
+  background:#1c3356;
+  border-color:#4c78b8;
+  color:#fff;
+}
+.segment-mode-help{
+  margin-top:6px;
+  color:#6f7d8b;
+  font-size:8px;
+  line-height:1.35;
+}
+.segment-badge{
+  position:absolute;
+  font:8px ui-monospace,SFMono-Regular,Menlo,monospace;
+  color:#aebbd0;
+  background:#0a0f14dd;
+  border:1px solid #293643;
+  border-radius:4px;
+  padding:2px 4px;
+  pointer-events:none;
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     TOP BAR
+===================================================== -->
+
+<header class="topbar">
+
+    <div class="logo">EZ<span>PATH</span></div>
+
+    <div class="game">V5RC AUTONOMOUS PLANNER · 2026–27</div>
+
+    <div class="workspace-tools" aria-label="Workspace panels">
+        <button id="toggleLeft" class="view-btn" title="Toggle Paths panel">☰ <span>Paths</span></button>
+        <button id="toggleRight" class="view-btn" title="Toggle Inspector panel">⚙ <span>Inspector</span></button>
+    </div>
+
+    <div class="spacer"></div>
+
+    <button id="undo">
+        ↶
+    </button>
+
+    <button id="redo">
+        ↷
+    </button>
+
+    <button id="save">
+        Save
+    </button>
+
+    <button id="load">
+        Load
+    </button>
+
+    <a
+  href="./auton-guide.html"
+  target="_blank"
+  class="top-button"
+>
+  Auton Guide
+</a>
+
+    <button
+        class="primary"
+        id="showCode"
+    >
+        Code
+    </button>
+
+</header>
+
+
+<main class="main">
+
+
+<!-- =====================================================
+     LEFT SIDEBAR
+===================================================== -->
+
+<aside class="sidebar left">
+
+    <div class="section">
+
+        <div class="title">
+            Autonomous
+        </div>
+
+        <button
+            class="full"
+            id="newPath"
+        >
+            ＋ New Path
+        </button>
+
+    </div>
+
+
+    <div class="section">
+
+        <div class="title">
+            Paths
+        </div>
+
+        <div id="paths"></div>
+
+    </div>
+
+
+    <div class="section">
+
+        <div class="title">
+            Robot
+        </div>
+
+        <div class="grid2">
+
+            <div>
+
+                <label>
+                    Width
+                </label>
+
+                <input
+                    id="robotWidth"
+                    type="number"
+                    value="18"
+                >
+
+            </div>
+
+            <div>
+
+                <label>
+                    Length
+                </label>
+
+                <input
+                    id="robotLength"
+                    type="number"
+                    value="18"
+                >
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <button
+            class="full"
+            id="red"
+        >
+            Red Robot
+        </button>
+
+        <br><br>
+
+        <button
+            class="full"
+            id="blue"
+        >
+            Blue Robot
+        </button>
+
+    </div>
+
+
+    <div class="section">
+
+        <div class="title">
+            Controls
+        </div>
+
+        <div class="muted">
+
+            Click the field to add
+            a waypoint.
+
+            <br><br>
+
+            Drag a waypoint to move it.
+
+            <br><br>
+
+            Shift + click deletes
+            a waypoint.
+
+            <br><br>
+
+            Scroll to zoom.
+
+            <br><br>
+
+            Middle mouse pans.
+
+        </div>
+
+    </div>
+
+</aside>
+
+
+<!-- =====================================================
+     FIELD
+===================================================== -->
+
+<section
+    class="field"
+    id="fieldContainer"
+>
+
+    <canvas id="canvas"></canvas>
+    <div class="field-toolbar">
+        <button class="field-tool active" id="toolSelect">Select</button>
+        <button class="field-tool" id="toolAdd">Add Point</button>
+        <button class="field-tool" id="toolPan">Pan</button>
+        <span class="field-divider"></span>
+        <span class="coords-readout" id="coordsReadout">X 0.0 · Y 0.0</span>
+    </div>
+
+
+    <div class="field-chrome">
+        <div class="field-title">
+            <span class="status-dot"></span>
+            <strong>FIELD</strong>
+            <span id="fieldStatus">Ready</span>
+        </div>
+        <div class="field-shortcuts">
+            <span><kbd>Click</kbd> add</span>
+            <span><kbd>Shift</kbd> + click delete</span>
+            <span><kbd>MMB</kbd> pan</span>
+        </div>
+    </div>
+
+
+    <div class="help">
+        0,0 = CENTER · Click to add waypoint
+    </div>
+
+
+    <div class="zoom">
+
+        <button id="fit">
+            Fit
+        </button>
+
+        <button id="minus">
+            −
+        </button>
+
+        <button id="plus">
+            +
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     RIGHT SIDEBAR
+===================================================== -->
+
+<aside class="sidebar right">
+
+    <div class="section">
+
+        <div class="title">
+            Selected Point
+        </div>
+
+
+        <div
+            id="none"
+            class="muted"
+        >
+            No waypoint selected.
+        </div>
+
+
+        <div
+            id="pointPanel"
+            class="hidden"
+        >
+
+            <div class="properties">
+
+                <div>
+
+                    <label>
+                        X (in)
+                    </label>
+
+                    <input
+                        id="x"
+                        type="number"
+                        step=".1"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Y (in)
+                    </label>
+
+                    <input
+                        id="y"
+                        type="number"
+                        step=".1"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Heading
+                    </label>
+
+                    <input
+                        id="heading"
+                        type="number"
+                        step="1"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Speed
+                    </label>
+
+                    <input
+                        id="speed"
+                        type="number"
+                        min="1"
+                        max="100"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <br>
+
+
+            <label>
+                Action
+            </label>
+
+            <select id="action">
+
+                <option value="">
+                    None
+                </option>
+
+                <option value="intake">
+                    Intake
+                </option>
+
+                <option value="outtake">
+                    Outtake
+                </option>
+
+                <option value="score">
+                    Score
+                </option>
+
+                <option value="toggle">
+                    Toggle
+                </option>
+
+                <option value="loader">
+                    Loader
+                </option>
+
+                <option value="wait">
+                    Wait
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <div class="section">
+
+        <div class="title">
+            Path
+        </div>
+
+        <div class="grid2">
+
+            <div>
+
+                <label>
+                    Max Speed
+                </label>
+
+                <input
+                    id="maxSpeed"
+                    type="number"
+                    value="100"
+                >
+
+            </div>
+
+            <div>
+
+                <label>
+                    Timeout
+                </label>
+
+                <input
+                    id="timeout"
+                    type="number"
+                    value="3"
+                >
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <div class="grid2">
+            <div>
+                <label>Path Type</label>
+                <select id="pathType">
+                    <option value="curved">Curved</option>
+                    <option value="straight">Straight</option>
+                </select>
+            </div>
+            <div>
+                <label>Curve Tension</label>
+                <input id="curveTension" type="number" min="0" max="100" step="5" value="55">
+            </div>
+        </div>
+
+        <div class="muted" style="margin-top:8px">
+            Curved follows a smooth path through the waypoints. Lower tension creates tighter turns.
+        </div>
+
+        <br>
+
+        <button
+            class="full"
+            id="reverse"
+        >
+            Reverse Path
+        </button>
+
+        <br><br>
+
+        <button
+            class="full"
+            id="clear"
+        >
+            Clear Path
+        </button>
+
+    </div>
+
+
+    <div class="section">
+
+        <div class="title">
+            Actions
+        </div>
+
+        <div id="actions"></div>
+
+    </div>
+
+</aside>
+
+</main>
+
+
+<script>
+
+/* ============================================================
+   IMPORTANT
+   ============================================================
+
+   THIS IS THE ACTUAL FIELD IMAGE.
+
+   Put:
+
+       override.png
+
+   beside this HTML file.
+
+   The image is used as the field itself.
+
+   We DO NOT redraw the field with fake geometry.
+
+============================================================ */
+
+
+/* ============================================================
+   FIELD IMAGE
+============================================================ */
+
+const fieldImage =
+    new Image();
+
+fieldImage.src =
+    "override.png";
+
+
+/*
+    Original image:
+
+        504 × 510
+
+    The actual square field in
+    the supplied image is approximately:
+
+        left   = 15
+        right  = 491
+
+        top    = 15
+        bottom = 494
+
+    We use those coordinates to
+    establish the VEX coordinate
+    system.
+
+    CENTER:
+
+        x = 253
+        y = 254.5
+*/
+
+const IMAGE_FIELD = {
+
+    left: 15,
+
+    right: 491,
+
+    top: 15,
+
+    bottom: 494
+
+};
+
+
+/*
+    VEX field dimensions
+*/
+
+const VEX_FIELD = 144;
+
+const HALF_FIELD = 72;
+
+
+/* ============================================================
+   CANVAS
+============================================================ */
+
+const canvas =
+    document.getElementById(
+        "canvas"
+    );
+
+const ctx =
+    canvas.getContext(
+        "2d"
+    );
+
+const container =
+    document.getElementById(
+        "fieldContainer"
+    );
+
+
+let scale = 1;
+
+let offsetX = 0;
+
+let offsetY = 0;
+
+
+/* ============================================================
+   PATH DATA
+============================================================ */
+
+let state = {
+
+    selectedPath: 0,
+
+    selectedPoint: -1,
+
+    paths: [
+
+        {
+
+            name: "Red Left",
+
+            color: "red",
+
+            maxSpeed: 100,
+
+            timeout: 3,
+
+            pathType: "curved",
+
+            curveTension: 55,
+
+            points: [
+
+                {
+                    x: -60,
+                    y: -48,
+                    heading: 90,
+                    speed: 70,
+                    action: ""
+                },
+
+                {
+                    x: -45,
+                    y: -35,
+                    heading: 45,
+                    speed: 80,
+                    action: "intake"
+                },
+
+                {
+                    x: -25,
+                    y: -20,
+                    heading: 45,
+                    speed: 85,
+                    action: ""
+                }
+
+            ]
+
+        }
+
+    ]
+
+};
+
+
+let dragging = null;
+
+let panning = false;
+
+let lastMouse = null;
+
+let robotColor = "red";
+
+
+/* ============================================================
+   IMAGE FIELD → SCREEN
+============================================================ */
+
+function fieldToScreen(
+    x,
+    y
+) {
+
+    /*
+       Convert VEX inches to
+       pixels inside original
+       field image.
+    */
+
+    const imageX =
+        IMAGE_FIELD.left +
+        (
+            (x + HALF_FIELD) /
+            VEX_FIELD
+        ) *
+        (
+            IMAGE_FIELD.right -
+            IMAGE_FIELD.left
+        );
+
+
+    const imageY =
+        IMAGE_FIELD.bottom -
+        (
+            (y + HALF_FIELD) /
+            VEX_FIELD
+        ) *
+        (
+            IMAGE_FIELD.bottom -
+            IMAGE_FIELD.top
+        );
+
+
+    /*
+       Convert image pixel to
+       displayed canvas pixel.
+    */
+
+    return [
+
+        offsetX +
+        imageX * scale,
+
+        offsetY +
+        imageY * scale
+
+    ];
+
+}
+
+
+/* ============================================================
+   SCREEN → FIELD
+============================================================ */
+
+function screenToField(
+    screenX,
+    screenY
+) {
+
+    const imageX =
+        (
+            screenX -
+            offsetX
+        ) / scale;
+
+
+    const imageY =
+        (
+            screenY -
+            offsetY
+        ) / scale;
+
+
+    const x =
+        (
+            (
+                imageX -
+                IMAGE_FIELD.left
+            ) /
+            (
+                IMAGE_FIELD.right -
+                IMAGE_FIELD.left
+            )
+        ) *
+        VEX_FIELD -
+        HALF_FIELD;
+
+
+    const y =
+        (
+            (
+                IMAGE_FIELD.bottom -
+                imageY
+            ) /
+            (
+                IMAGE_FIELD.bottom -
+                IMAGE_FIELD.top
+            )
+        ) *
+        VEX_FIELD -
+        HALF_FIELD;
+
+
+    return [x, y];
+
+}
+
+
+/* ============================================================
+   RESIZE
+============================================================ */
+
+function resize() {
+
+    const rect =
+        container.getBoundingClientRect();
+
+
+    const dpr =
+        window.devicePixelRatio || 1;
+
+
+    canvas.width =
+        rect.width * dpr;
+
+    canvas.height =
+        rect.height * dpr;
+
+
+    canvas.style.width =
+        rect.width + "px";
+
+    canvas.style.height =
+        rect.height + "px";
+
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+
+    fit();
+
+}
+
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+
+/* ============================================================
+   FIT
+============================================================ */
+
+function fit() {
+
+    const w =
+        container.clientWidth;
+
+    const h =
+        container.clientHeight;
+
+
+    /*
+       The source image is
+       504 × 510.
+
+       Keep the exact aspect ratio.
+    */
+
+    const imageWidth =
+        504;
+
+    const imageHeight =
+        510;
+
+
+    scale =
+        Math.min(
+
+            (w - 40) /
+                imageWidth,
+
+            (h - 40) /
+                imageHeight
+
+        );
+
+
+    offsetX =
+        (
+            w -
+            imageWidth * scale
+        ) / 2;
+
+
+    offsetY =
+        (
+            h -
+            imageHeight * scale
+        ) / 2;
+
+
+    draw();
+
+}
+
+
+/* ============================================================
+   DRAW FIELD IMAGE
+============================================================ */
+
+function drawField() {
+
+    /*
+       THIS is what makes the
+       field actually match your
+       screenshot.
+    */
+
+    ctx.drawImage(
+
+        fieldImage,
+
+        offsetX,
+        offsetY,
+
+        504 * scale,
+        510 * scale
+
+    );
+
+}
+
+
+/* ============================================================
+   PATH
+============================================================ */
+
+function getCurveTension(path) {
+    const value = Number(path?.curveTension);
+    return Math.max(0, Math.min(100, Number.isFinite(value) ? value : 55));
+}
+
+function interpolateHeading(a, b, t) {
+    a = Number(a) || 0;
+    b = Number(b) || 0;
+    const delta = ((b - a + 540) % 360) - 180;
+    return a + delta * t;
+}
+
+/*
+    Sample the actual path used by both the renderer and simulator.
+    Curved mode uses Catmull-Rom tangents converted into cubic Bézier
+    control points, so the curve passes through each waypoint.
+*/
+function samplePath(path, t) {
+
+    if (!path || !path.points.length) {
+        return {x:0, y:0, heading:0};
+    }
+
+    if (path.points.length === 1) {
+        const q = path.points[0];
+        return {x:q.x, y:q.y, heading:q.heading || 0};
+    }
+
+    t = Math.max(0, Math.min(1, t));
+
+    const scaled = t * (path.points.length - 1);
+    const i = Math.min(path.points.length - 2, Math.floor(scaled));
+    const f = scaled - i;
+
+    const p1 = path.points[i];
+    const p2 = path.points[i + 1];
+
+    if (path.pathType !== "curved") {
+        return {
+            x: p1.x + (p2.x - p1.x) * f,
+            y: p1.y + (p2.y - p1.y) * f,
+            heading: interpolateHeading(p1.heading, p2.heading, f)
+        };
+    }
+
+    const p0 = path.points[Math.max(0, i - 1)];
+    const p3 = path.points[Math.min(path.points.length - 1, i + 2)];
+
+    const tangentScale = 0.5 * (1 - getCurveTension(path) / 100);
+
+    const c1x = p1.x + (p2.x - p0.x) * tangentScale;
+    const c1y = p1.y + (p2.y - p0.y) * tangentScale;
+    const c2x = p2.x - (p3.x - p1.x) * tangentScale;
+    const c2y = p2.y - (p3.y - p1.y) * tangentScale;
+
+    const u = 1 - f;
+
+    const x =
+        u*u*u*p1.x +
+        3*u*u*f*c1x +
+        3*u*f*f*c2x +
+        f*f*f*p2.x;
+
+    const y =
+        u*u*u*p1.y +
+        3*u*u*f*c1y +
+        3*u*f*f*c2y +
+        f*f*f*p2.y;
+
+    const dx =
+        3*u*u*(c1x-p1.x) +
+        6*u*f*(c2x-c1x) +
+        3*f*f*(p2.x-c2x);
+
+    const dy =
+        3*u*u*(c1y-p1.y) +
+        6*u*f*(c2y-c1y) +
+        3*f*f*(p2.y-c2y);
+
+    let heading = interpolateHeading(p1.heading, p2.heading, f);
+
+    if (Math.hypot(dx, dy) > 0.001) {
+        heading = -Math.atan2(dy, dx) * 180 / Math.PI;
+        if (heading < 0) heading += 360;
+    }
+
+    return {x, y, heading};
+}
+
+function drawPath() {
+
+    const path = state.paths[state.selectedPath];
+
+    if (!path || path.points.length === 0) {
+        return;
+    }
+
+    if (path.points.length > 1) {
+
+        ctx.beginPath();
+
+        const first = fieldToScreen(
+            path.points[0].x,
+            path.points[0].y
+        );
+
+        ctx.moveTo(first[0], first[1]);
+
+        if (path.pathType === "curved") {
+
+            const samples = Math.max(
+                80,
+                (path.points.length - 1) * 35
+            );
+
+            for (let s = 1; s <= samples; s++) {
+                const q = samplePath(path, s / samples);
+                const screen = fieldToScreen(q.x, q.y);
+                ctx.lineTo(screen[0], screen[1]);
+            }
+
+        } else {
+
+            for (let i = 1; i < path.points.length; i++) {
+                const q = fieldToScreen(
+                    path.points[i].x,
+                    path.points[i].y
+                );
+                ctx.lineTo(q[0], q[1]);
+            }
+        }
+
+        ctx.shadowColor = "#5790ff";
+        ctx.shadowBlur = 8;
+        ctx.strokeStyle = "#6598ff";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
+
+    path.points.forEach((point, index) => {
+
+        const p = fieldToScreen(point.x, point.y);
+
+        if (index === state.selectedPoint) {
+
+            const angle = -point.heading * Math.PI / 180;
+            const handleLength = 28;
+
+            ctx.beginPath();
+            ctx.moveTo(p[0], p[1]);
+            ctx.lineTo(
+                p[0] + Math.cos(angle) * handleLength,
+                p[1] + Math.sin(angle) * handleLength
+            );
+
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(
+                p[0] + Math.cos(angle) * handleLength,
+                p[1] + Math.sin(angle) * handleLength,
+                4,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+        }
+
+        ctx.beginPath();
+        ctx.arc(
+            p[0],
+            p[1],
+            index === state.selectedPoint ? 6 : 4,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle =
+            index === state.selectedPoint
+                ? "#ffffff"
+                : "#5f94ff";
+
+        ctx.fill();
+
+        ctx.strokeStyle = "#101820";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 10px Arial";
+        ctx.fillText(index, p[0] + 8, p[1] - 8);
+
+        if (point.action) {
+            ctx.fillStyle = "#f2cf48";
+            ctx.font = "10px Arial";
+            ctx.fillText(point.action, p[0] + 8, p[1] + 12);
+        }
+    });
+
+    drawRobot(path);
+}
+
+
+/* ============================================================
+   ROBOT
+============================================================ */
+
+function drawRobot(
+    path
+) {
+
+    if (
+        path.points.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    let index =
+        state.selectedPoint;
+
+
+    if (
+        index < 0
+    ) {
+
+        index = 0;
+
+    }
+
+
+    const point =
+        path.points[index];
+
+
+    const p =
+        fieldToScreen(
+            point.x,
+            point.y
+        );
+
+
+    const width =
+        Number(
+            document.getElementById(
+                "robotWidth"
+            ).value
+        );
+
+
+    const length =
+        Number(
+            document.getElementById(
+                "robotLength"
+            ).value
+        );
+
+
+    /*
+       Scale robot inches
+       using actual field scale.
+    */
+
+    const fieldPixelWidth =
+        (
+            IMAGE_FIELD.right -
+            IMAGE_FIELD.left
+        ) *
+        scale;
+
+
+    const pixelsPerInch =
+        fieldPixelWidth /
+        VEX_FIELD;
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        p[0],
+        p[1]
+    );
+
+
+    ctx.rotate(
+        -point.heading *
+        Math.PI /
+        180
+    );
+
+
+    ctx.fillStyle =
+        robotColor === "red"
+            ? "rgba(225,55,75,.70)"
+            : "rgba(55,125,225,.70)";
+
+
+    ctx.strokeStyle =
+        "#ffffff";
+
+    ctx.lineWidth =
+        1.5;
+
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+
+        -length *
+        pixelsPerInch /
+        2,
+
+        -width *
+        pixelsPerInch /
+        2,
+
+        length *
+        pixelsPerInch,
+
+        width *
+        pixelsPerInch,
+
+        4
+
+    );
+
+
+    ctx.fill();
+
+    ctx.stroke();
+
+
+    /*
+       Front arrow
+    */
+
+    ctx.fillStyle =
+        "#ffffff";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+
+        length *
+        pixelsPerInch /
+        2,
+
+        0
+
+    );
+
+
+    ctx.lineTo(
+
+        length *
+        pixelsPerInch /
+        2 - 10,
+
+        -5
+
+    );
+
+
+    ctx.lineTo(
+
+        length *
+        pixelsPerInch /
+        2 - 10,
+
+        5
+
+    );
+
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    ctx.restore();
+
+}
+
+
+/* ============================================================
+   DRAW
+============================================================ */
+
+function draw() {
+
+    ctx.clearRect(
+
+        0,
+        0,
+
+        canvas.clientWidth,
+        canvas.clientHeight
+
+    );
+
+
+    drawField();
+
+    drawPath();
+
+    updateUI();
+
+    if (typeof syncPathControls === "function") {
+        syncPathControls();
+    }
+
+}
+
+
+/* ============================================================
+   FIND NEAREST POINT
+============================================================ */
+
+function nearestPoint(
+    fieldX,
+    fieldY
+) {
+
+    const path =
+        state.paths[
+            state.selectedPath
+        ];
+
+
+    let nearest = -1;
+
+    let distance =
+        5;
+
+
+    path.points.forEach(
+        (point, index) => {
+
+            const d =
+                Math.hypot(
+
+                    point.x -
+                    fieldX,
+
+                    point.y -
+                    fieldY
+
+                );
+
+
+            if (
+                d < distance
+            ) {
+
+                distance = d;
+
+                nearest = index;
+
+            }
+
+        }
+    );
+
+
+    return nearest;
+
+}
+
+
+/* ============================================================
+   POINTER DOWN
+============================================================ */
+
+canvas.addEventListener(
+    "pointerdown",
+    event => {
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        const sx =
+            event.clientX -
+            rect.left;
+
+        const sy =
+            event.clientY -
+            rect.top;
+
+
+        /*
+           Middle mouse = pan
+        */
+
+        if (
+            event.button === 1 ||
+            event.button === 2
+        ) {
+
+            panning = true;
+
+            lastMouse = {
+                x: sx,
+                y: sy
+            };
+
+
+            canvas.setPointerCapture(
+                event.pointerId
+            );
+
+            return;
+
+        }
+
+
+        const [
+            x,
+            y
+        ] =
+            screenToField(
+                sx,
+                sy
+            );
+
+
+        /*
+           Don't allow points
+           outside the actual field.
+        */
+
+        if (
+            x < -72 ||
+            x > 72 ||
+            y < -72 ||
+            y > 72
+        ) {
+
+            return;
+
+        }
+
+
+        const path =
+            state.paths[
+                state.selectedPath
+            ];
+
+
+        const nearest =
+            nearestPoint(
+                x,
+                y
+            );
+
+
+        /*
+           Shift click = delete
+        */
+
+        if (
+            event.shiftKey &&
+            nearest >= 0
+        ) {
+
+            path.points.splice(
+                nearest,
+                1
+            );
+
+
+            state.selectedPoint =
+                -1;
+
+
+            draw();
+
+            return;
+
+        }
+
+
+        /*
+           Click existing point
+        */
+
+        if (
+            nearest >= 0
+        ) {
+
+            state.selectedPoint =
+                nearest;
+
+
+            dragging =
+                nearest;
+
+
+            canvas.setPointerCapture(
+                event.pointerId
+            );
+
+
+            draw();
+
+            return;
+
+        }
+
+
+        /*
+           Add point
+        */
+
+        path.points.push({
+
+            x: x,
+
+            y: y,
+
+            heading: 0,
+
+            speed: 80,
+
+            action: ""
+
+        });
+
+
+        state.selectedPoint =
+            path.points.length - 1;
+
+
+        draw();
+
+    }
+);
+
+
+/* ============================================================
+   POINTER MOVE
+============================================================ */
+
+canvas.addEventListener(
+    "pointermove",
+    event => {
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        const sx =
+            event.clientX -
+            rect.left;
+
+        const sy =
+            event.clientY -
+            rect.top;
+
+
+        /*
+           Pan
+        */
+
+        if (panning) {
+
+            offsetX +=
+                sx -
+                lastMouse.x;
+
+
+            offsetY +=
+                sy -
+                lastMouse.y;
+
+
+            lastMouse = {
+
+                x: sx,
+                y: sy
+
+            };
+
+
+            draw();
+
+            return;
+
+        }
+
+
+        /*
+           Drag point
+        */
+
+        if (
+            dragging !== null
+        ) {
+
+            const [
+                x,
+                y
+            ] =
+                screenToField(
+                    sx,
+                    sy
+                );
+
+
+            const point =
+                state.paths[
+                    state.selectedPath
+                ].points[
+                    dragging
+                ];
+
+
+            point.x =
+                Math.max(
+                    -72,
+                    Math.min(
+                        72,
+                        x
+                    )
+                );
+
+
+            point.y =
+                Math.max(
+                    -72,
+                    Math.min(
+                        72,
+                        y
+                    )
+                );
+
+
+            draw();
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   POINTER UP
+============================================================ */
+
+canvas.addEventListener(
+    "pointerup",
+    () => {
+
+        dragging = null;
+
+        panning = false;
+
+    }
+);
+
+
+canvas.addEventListener(
+    "contextmenu",
+    event => {
+
+        event.preventDefault();
+
+    }
+);
+
+
+/* ============================================================
+   ZOOM
+============================================================ */
+
+canvas.addEventListener(
+    "wheel",
+    event => {
+
+        event.preventDefault();
+
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        const mouseX =
+            event.clientX -
+            rect.left;
+
+        const mouseY =
+            event.clientY -
+            rect.top;
+
+
+        /*
+           Zoom around cursor.
+        */
+
+        const oldScale =
+            scale;
+
+
+        const newScale =
+            event.deltaY < 0
+                ? scale * 1.1
+                : scale * .9;
+
+
+        scale =
+            Math.max(
+                .25,
+                Math.min(
+                    5,
+                    newScale
+                )
+            );
+
+
+        offsetX =
+            mouseX -
+            (
+                mouseX -
+                offsetX
+            ) *
+            (
+                scale /
+                oldScale
+            );
+
+
+        offsetY =
+            mouseY -
+            (
+                mouseY -
+                offsetY
+            ) *
+            (
+                scale /
+                oldScale
+            );
+
+
+        draw();
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+/* ============================================================
+   ZOOM BUTTONS
+============================================================ */
+
+document
+    .getElementById("plus")
+    .onclick = () => {
+
+        scale *= 1.15;
+
+        draw();
+
+    };
+
+
+document
+    .getElementById("minus")
+    .onclick = () => {
+
+        scale /= 1.15;
+
+        draw();
+
+    };
+
+
+document
+    .getElementById("fit")
+    .onclick =
+    fit;
+
+
+/* ============================================================
+   POINT EDITING
+============================================================ */
+
+function selectedPoint() {
+
+    const path =
+        state.paths[
+            state.selectedPath
+        ];
+
+
+    if (
+        state.selectedPoint < 0
+    ) {
+
+        return null;
+
+    }
+
+
+    return path.points[
+        state.selectedPoint
+    ];
+
+}
+
+
+/* X */
+
+document
+    .getElementById("x")
+    .oninput = event => {
+
+        const point =
+            selectedPoint();
+
+
+        if (!point) return;
+
+
+        point.x =
+            Number(
+                event.target.value
+            );
+
+
+        draw();
+
+    };
+
+
+/* Y */
+
+document
+    .getElementById("y")
+    .oninput = event => {
+
+        const point =
+            selectedPoint();
+
+
+        if (!point) return;
+
+
+        point.y =
+            Number(
+                event.target.value
+            );
+
+
+        draw();
+
+    };
+
+
+/* HEADING */
+
+document
+    .getElementById("heading")
+    .oninput = event => {
+
+        const point =
+            selectedPoint();
+
+
+        if (!point) return;
+
+
+        point.heading =
+            Number(
+                event.target.value
+            );
+
+
+        draw();
+
+    };
+
+
+/* SPEED */
+
+document
+    .getElementById("speed")
+    .oninput = event => {
+
+        const point =
+            selectedPoint();
+
+
+        if (!point) return;
+
+
+        point.speed =
+            Number(
+                event.target.value
+            );
+
+
+        draw();
+
+    };
+
+
+/* ACTION */
+
+document
+    .getElementById("action")
+    .onchange = event => {
+
+        const point =
+            selectedPoint();
+
+
+        if (!point) return;
+
+
+        point.action =
+            event.target.value;
+
+
+        draw();
+
+    };
+
+
+/* ============================================================
+   CURVED PATH CONTROLS
+============================================================ */
+
+function syncPathControls() {
+
+    const path = state.paths[state.selectedPath];
+    if (!path) return;
+
+    const type = document.getElementById("pathType");
+    const tension = document.getElementById("curveTension");
+
+    if (type) {
+        type.value = path.pathType || "curved";
+    }
+
+    if (tension) {
+        tension.value = Number.isFinite(Number(path.curveTension))
+            ? path.curveTension
+            : 55;
+
+        tension.disabled = path.pathType !== "curved";
+    }
+}
+
+document.getElementById("pathType").onchange = event => {
+
+    const path = state.paths[state.selectedPath];
+    if (!path) return;
+
+    path.pathType = event.target.value;
+    syncPathControls();
+    draw();
+};
+
+document.getElementById("curveTension").oninput = event => {
+
+    const path = state.paths[state.selectedPath];
+    if (!path) return;
+
+    path.curveTension = Math.max(
+        0,
+        Math.min(100, Number(event.target.value) || 0)
+    );
+
+    draw();
+};
+
+
+
+/* ============================================================
+   NEW PATH
+============================================================ */
+
+document
+    .getElementById("newPath")
+    .onclick = () => {
+
+        state.paths.push({
+
+            name:
+                "Path " +
+                (
+                    state.paths.length + 1
+                ),
+
+            color:
+                state.paths.length % 2
+                    ? "blue"
+                    : "red",
+
+            maxSpeed: 100,
+
+            timeout: 3,
+
+            pathType: "curved",
+
+            curveTension: 55,
+
+            points: []
+
+        });
+
+
+        state.selectedPath =
+            state.paths.length - 1;
+
+
+        state.selectedPoint =
+            -1;
+
+
+        draw();
+
+    };
+
+
+/* ============================================================
+   CLEAR
+============================================================ */
+
+document
+    .getElementById("clear")
+    .onclick = () => {
+
+        state.paths[
+            state.selectedPath
+        ].points = [];
+
+
+        state.selectedPoint =
+            -1;
+
+
+        draw();
+
+    };
+
+
+/* ============================================================
+   REVERSE
+============================================================ */
+
+document
+    .getElementById("reverse")
+    .onclick = () => {
+
+        state.paths[
+            state.selectedPath
+        ].points.reverse();
+
+
+        draw();
+
+    };
+
+
+/* ============================================================
+   ROBOT
+============================================================ */
+
+document
+    .getElementById("red")
+    .onclick = () => {
+
+        robotColor =
+            "red";
+
+        draw();
+
+    };
+
+
+document
+    .getElementById("blue")
+    .onclick = () => {
+
+        robotColor =
+            "blue";
+
+        draw();
+
+    };
+
+
+document
+    .getElementById("robotWidth")
+    .oninput = draw;
+
+
+document
+    .getElementById("robotLength")
+    .oninput = draw;
+
+
+/* ============================================================
+   PATH SETTINGS
+============================================================ */
+
+document
+    .getElementById("maxSpeed")
+    .oninput = event => {
+
+        state.paths[
+            state.selectedPath
+        ].maxSpeed =
+            Number(
+                event.target.value
+            );
+
+    };
+
+
+document
+    .getElementById("timeout")
+    .oninput = event => {
+
+        state.paths[
+            state.selectedPath
+        ].timeout =
+            Number(
+                event.target.value
+            );
+
+    };
+
+
+/* ============================================================
+   UPDATE UI
+============================================================ */
+
+function updateUI() {
+
+    const path =
+        state.paths[
+            state.selectedPath
+        ];
+
+
+    /*
+       Path list
+    */
+
+    const paths =
+        document.getElementById(
+            "paths"
+        );
+
+
+    paths.innerHTML = "";
+
+
+    state.paths.forEach(
+        (path, index) => {
+
+            const element =
+                document.createElement(
+                    "div"
+                );
+
+
+            element.className =
+                "path" +
+                (
+                    index ===
+                    state.selectedPath
+                        ? " selected"
+                        : ""
+                );
+
+
+            element.innerHTML = `
+
+                <span
+                    class="dot"
+                    style="
+                    background:
+                    ${
+                        path.color === "red"
+                        ? "#ed4d60"
+                        : "#4d89ef"
+                    }
+                    "
+                ></span>
+
+                <span class="path-name">
+                    ${path.name}
+                </span>
+
+                <span class="path-count">
+                    ${path.points.length}
+                </span>
+
+            `;
+
+
+            element.onclick =
+                () => {
+
+                    state.selectedPath =
+                        index;
+
+
+                    state.selectedPoint =
+                        -1;
+
+
+                    draw();
+
+                };
+
+
+            paths.appendChild(
+                element
+            );
+
+        }
+    );
+
+
+    /*
+       Point properties
+    */
+
+    const point =
+        selectedPoint();
+
+
+    const none =
+        document.getElementById(
+            "none"
+        );
+
+
+    const panel =
+        document.getElementById(
+            "pointPanel"
+        );
+
+
+    if (point) {
+
+        none.classList.add(
+            "hidden"
+        );
+
+
+        panel.classList.remove(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "x"
+        ).value =
+            point.x.toFixed(1);
+
+
+        document.getElementById(
+            "y"
+        ).value =
+            point.y.toFixed(1);
+
+
+        document.getElementById(
+            "heading"
+        ).value =
+            point.heading;
+
+
+        document.getElementById(
+            "speed"
+        ).value =
+            point.speed;
+
+
+        document.getElementById(
+            "action"
+        ).value =
+            point.action;
+
+    } else {
+
+        none.classList.remove(
+            "hidden"
+        );
+
+
+        panel.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    /*
+       Path properties
+    */
+
+    document.getElementById(
+        "maxSpeed"
+    ).value =
+        path.maxSpeed;
+
+
+    document.getElementById(
+        "timeout"
+    ).value =
+        path.timeout;
+
+
+    /*
+       Actions
+    */
+
+    const actions =
+        document.getElementById(
+            "actions"
+        );
+
+
+    actions.innerHTML = "";
+
+
+    path.points.forEach(
+        (point, index) => {
+
+            if (
+                !point.action
+            ) return;
+
+
+            const action =
+                document.createElement(
+                    "div"
+                );
+
+
+            action.className =
+                "action";
+
+
+            action.innerHTML = `
+
+                <span>
+                    ${index + 1}.
+                    ${point.action}
+                </span>
+
+                <button>
+                    Go
+                </button>
+
+            `;
+
+
+            action
+                .querySelector(
+                    "button"
+                )
+                .onclick =
+                () => {
+
+                    state.selectedPoint =
+                        index;
+
+                    draw();
+
+                };
+
+
+            actions.appendChild(
+                action
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   SAVE
+============================================================ */
+
+document
+    .getElementById("save")
+    .onclick = () => {
+
+        const data =
+            JSON.stringify(
+                state,
+                null,
+                2
+            );
+
+
+        const blob =
+            new Blob(
+                [data],
+                {
+                    type:
+                        "application/json"
+                }
+            );
+
+
+        const url =
+            URL.createObjectURL(
+                blob
+            );
+
+
+        const a =
+            document.createElement(
+                "a"
+            );
+
+
+        a.href =
+            url;
+
+        a.download =
+            "override-auton.json";
+
+        a.click();
+
+
+        URL.revokeObjectURL(
+            url
+        );
+
+    };
+
+
+/* ============================================================
+   LOAD
+============================================================ */
+
+document
+    .getElementById("load")
+    .onclick = () => {
+
+        const input =
+            document.createElement(
+                "input"
+            );
+
+
+        input.type =
+            "file";
+
+        input.accept =
+            ".json";
+
+
+        input.onchange =
+            event => {
+
+                const file =
+                    event.target.files[0];
+
+
+                if (!file) return;
+
+
+                const reader =
+                    new FileReader();
+
+
+                reader.onload =
+                    () => {
+
+                        try {
+
+                            state =
+                                JSON.parse(
+                                    reader.result
+                                );
+
+
+                            draw();
+
+                        } catch {
+
+                            alert(
+                                "Invalid path file."
+                            );
+
+                        }
+
+                    };
+
+
+                reader.readAsText(
+                    file
+                );
+
+            };
+
+
+        input.click();
+
+    };
+
+
+/* ============================================================
+   CODE GENERATOR
+============================================================ */
+
+document
+    .getElementById("showCode")
+    .onclick = () => {
+
+        const path =
+            state.paths[
+                state.selectedPath
+            ];
+
+
+        let code =
+`// V5RC Override
+// Generated by Override Path
+//
+// Coordinate system:
+// (0,0) = center of field
+//
+// +X = right
+// +Y = up
+
+void autonomousPath() {
+
+`;
+
+
+        path.points.forEach(
+            (point, index) => {
+
+                code +=
+`    // Point ${index + 1}
+    // X: ${point.x.toFixed(2)} in
+    // Y: ${point.y.toFixed(2)} in
+    // Heading: ${point.heading}°
+    // Speed: ${point.speed}%
+`;
+
+
+                if (
+                    point.action
+                ) {
+
+                    code +=
+`    // Action: ${point.action}
+`;
+
+                }
+
+
+                code += "\n";
+
+            }
+        );
+
+
+        code +=
+`    // TODO:
+    // Convert waypoints into
+    // LemLib commands.
+}`;
+
+
+        alert(code);
+
+    };
+
+
+/* ============================================================
+   UNDO / REDO
+============================================================ */
+
+document
+    .getElementById("undo")
+    .onclick = () => {
+
+        alert(
+            "Undo system coming next."
+        );
+
+    };
+
+
+document
+    .getElementById("redo")
+    .onclick = () => {
+
+        alert(
+            "Redo system coming next."
+        );
+
+    };
+
+
+/* ============================================================
+   WAIT FOR FIELD IMAGE
+============================================================ */
+
+fieldImage.onload =
+    () => {
+
+        resize();
+
+    };
+
+
+fieldImage.onerror =
+    () => {
+
+        alert(
+            "Put your field screenshot in the same folder as this HTML and name it override.png"
+        );
+
+    };
+
+</script>
+
+
+<!-- ============================================================
+     EXTENDED PLANNER UI — additive only
+============================================================ -->
+<div id="featureModalHost"></div>
+<div id="toastHost"></div>
+
+<script>
+/* EXTENDED PLANNER FEATURES — additive layer */
+(() => {
+    const $ = id => document.getElementById(id);
+    const clone = o => JSON.parse(JSON.stringify(o));
+
+    const toast = m => {
+        const h = $("toastHost");
+        if (!h) return;
+
+        h.innerHTML = "";
+
+        const e = document.createElement("div");
+        e.className = "toast";
+        e.textContent = m;
+
+        h.appendChild(e);
+
+        setTimeout(() => e.remove(), 1800);
+    };
+
+    const history = [];
+    const redoHistory = [];
+
+    let last = JSON.stringify(state);
+    let restoring = false;
+
+    function snap() {
+        if (restoring) return;
+
+        const s = JSON.stringify(state);
+
+        if (s !== last) {
+            history.push(last);
+
+            if (history.length > 80) {
+                history.shift();
+            }
+
+            redoHistory.length = 0;
+            last = s;
+        }
+    }
+
+    function restore(s) {
+        restoring = true;
+        state = JSON.parse(s);
+        restoring = false;
+
+        draw();
+        last = JSON.stringify(state);
+    }
+
+    function undo() {
+        if (!history.length) {
+            return toast("Nothing to undo");
+        }
+
+        redoHistory.push(JSON.stringify(state));
+        restore(history.pop());
+
+        toast("Undo");
+    }
+
+    function redoFn() {
+        if (!redoHistory.length) {
+            return toast("Nothing to redo");
+        }
+
+        history.push(JSON.stringify(state));
+        restore(redoHistory.pop());
+
+        toast("Redo");
+    }
+
+    if ($("undo")) {
+        $("undo").onclick = undo;
+    }
+
+    if ($("redo")) {
+        $("redo").onclick = redoFn;
+    }
+
+    /* Track changes */
+    if (typeof canvas !== "undefined") {
+        canvas.addEventListener("pointerdown", snap, true);
+    }
+
+    [
+        "x",
+        "y",
+        "heading",
+        "speed",
+        "action",
+        "maxSpeed",
+        "timeout",
+        "pathType",
+        "curveTension",
+        "robotWidth",
+        "robotLength"
+    ].forEach(id => {
+        const e = $(id);
+
+        if (e) {
+            e.addEventListener("input", snap, true);
+        }
+    });
+
+    /* Keyboard shortcuts */
+    document.addEventListener("keydown", e => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+            e.preventDefault();
+
+            if (e.shiftKey) {
+                redoFn();
+            } else {
+                undo();
+            }
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
+            e.preventDefault();
+            redoFn();
+        }
+    });
+
+    /* PATH MANAGEMENT */
+
+    const ps = document.querySelector(".left .section:nth-child(2)");
+
+    if (ps && !$("pathTools")) {
+        const d = document.createElement("div");
+
+        d.id = "pathTools";
+        d.className = "path-actions";
+
+        d.innerHTML = `
+            <button class="feature-btn" id="dupPath">Duplicate</button>
+            <button class="feature-btn" id="renPath">Rename</button>
+            <button class="feature-btn" id="delPath">Delete</button>
+        `;
+
+        ps.appendChild(d);
+
+        $("dupPath").onclick = () => {
+            snap();
+
+            const p = clone(state.paths[state.selectedPath]);
+
+            p.name = p.name + " Copy";
+
+            state.paths.push(p);
+            state.selectedPath = state.paths.length - 1;
+            state.selectedPoint = -1;
+
+            draw();
+
+            toast("Path duplicated");
+        };
+
+        $("renPath").onclick = () => {
+            const p = state.paths[state.selectedPath];
+
+            if (!p) return;
+
+            const n = prompt("Path name:", p.name);
+
+            if (n !== null) {
+                snap();
+
+                p.name =
+                    n
+                        .replace(/[<>]/g, "")
+                        .slice(0, 40) || "Path";
+
+                draw();
+
+                toast("Path renamed");
+            }
+        };
+
+        $("delPath").onclick = () => {
+            if (state.paths.length < 2) {
+                return toast("Keep at least one path");
+            }
+
+            if (confirm("Delete selected path?")) {
+                snap();
+
+                state.paths.splice(
+                    state.selectedPath,
+                    1
+                );
+
+                state.selectedPath =
+                    Math.min(
+                        state.selectedPath,
+                        state.paths.length - 1
+                    );
+
+                state.selectedPoint = -1;
+
+                draw();
+
+                toast("Path deleted");
+            }
+        };
+    }
+
+    /* MORE ACTION TYPES */
+
+    const ac = $("action");
+
+    if (ac) {
+        [
+            ["turn", "Turn"],
+            ["move", "Move"],
+            ["clamp", "Clamp"],
+            ["release", "Release"],
+            ["score_low", "Score Low"],
+            ["score_high", "Score High"]
+        ].forEach(([value, text]) => {
+            if (
+                ![...ac.options].some(
+                    option => option.value === value
+                )
+            ) {
+                const option =
+                    document.createElement("option");
+
+                option.value = value;
+                option.textContent = text;
+
+                ac.appendChild(option);
+            }
+        });
+    }
+
+    /* TIMELINE */
+
+    const act = $("actions");
+
+    if (act && !$("plannerTimeline")) {
+        const timeline =
+            document.createElement("div");
+
+        timeline.id = "plannerTimeline";
+        timeline.style.marginTop = "8px";
+
+        act.parentNode.appendChild(timeline);
+
+        const oldDraw = draw;
+
+        draw = function () {
+            oldDraw();
+
+            timeline.innerHTML = "";
+
+            const p =
+                state.paths[state.selectedPath];
+
+            if (!p) return;
+
+            p.points.forEach((pt, i) => {
+                const e =
+                    document.createElement("div");
+
+                e.className =
+                    "timeline-item" +
+                    (
+                        i === state.selectedPoint
+                            ? " selected"
+                            : ""
+                    );
+
+                e.textContent =
+                    `${i + 1}. ` +
+                    `(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)}) ` +
+                    `· ${pt.heading}° ` +
+                    `· ${pt.speed}%` +
+                    (
+                        pt.action
+                            ? ` · ${pt.action.toUpperCase()}`
+                            : ""
+                    );
+
+                e.onclick = () => {
+                    state.selectedPoint = i;
+                    draw();
+                };
+
+                timeline.appendChild(e);
+            });
+        };
+    }
+
+    /* HEADING HANDLE DRAGGING */
+
+    let headingDragging = false;
+
+    if (typeof canvas !== "undefined") {
+        canvas.addEventListener(
+            "pointerdown",
+            e => {
+                if (
+                    e.button !== 0 ||
+                    state.selectedPoint < 0
+                ) {
+                    return;
+                }
+
+                const pt =
+                    state.paths[state.selectedPath]
+                        .points[state.selectedPoint];
+
+                if (!pt) return;
+
+                const c =
+                    fieldToScreen(
+                        pt.x,
+                        pt.y
+                    );
+
+                const a =
+                    -pt.heading *
+                    Math.PI /
+                    180;
+
+                const hx =
+                    c[0] +
+                    Math.cos(a) *
+                    28;
+
+                const hy =
+                    c[1] +
+                    Math.sin(a) *
+                    28;
+
+                const r = 10;
+
+                const rect =
+                    canvas.getBoundingClientRect();
+
+                const mx =
+                    e.clientX -
+                    rect.left;
+
+                const my =
+                    e.clientY -
+                    rect.top;
+
+                if (
+                    Math.hypot(
+                        mx - hx,
+                        my - hy
+                    ) < r
+                ) {
+                    snap();
+
+                    headingDragging = true;
+
+                    canvas.setPointerCapture(
+                        e.pointerId
+                    );
+                }
+            },
+            true
+        );
+
+        canvas.addEventListener(
+            "pointermove",
+            e => {
+                if (!headingDragging) return;
+
+                const rect =
+                    canvas.getBoundingClientRect();
+
+                const mx =
+                    e.clientX -
+                    rect.left;
+
+                const my =
+                    e.clientY -
+                    rect.top;
+
+                const pt =
+                    state.paths[state.selectedPath]
+                        .points[state.selectedPoint];
+
+                if (!pt) return;
+
+                const c =
+                    fieldToScreen(
+                        pt.x,
+                        pt.y
+                    );
+
+                let deg =
+                    -Math.atan2(
+                        my - c[1],
+                        mx - c[0]
+                    ) *
+                    180 /
+                    Math.PI;
+
+                if (deg < 0) {
+                    deg += 360;
+                }
+
+                pt.heading =
+                    Math.round(deg);
+
+                draw();
+            },
+            true
+        );
+
+        canvas.addEventListener(
+            "pointerup",
+            () => {
+                headingDragging = false;
+            },
+            true
+        );
+
+        canvas.addEventListener(
+            "pointercancel",
+            () => {
+                headingDragging = false;
+            },
+            true
+        );
+    }
+
+    /* CODE GENERATOR */
+
+    function generateCode(kind) {
+        const p =
+            state.paths[state.selectedPath];
+
+        if (!p) return "";
+
+        if (kind === "json") {
+            return JSON.stringify(
+                state,
+                null,
+                2
+            );
+        }
+
+        return `// V5RC Override 2026–27
+// Generated by Override Path Planner
+// (0,0) = exact field center
+
+void autonomousPath() {
+
+    // Path type: ${p.pathType || "curved"}
+    // Curve tension: ${Number(p.curveTension ?? 55).toFixed(0)}%
+    // Curved mode is intended for a path-following controller.
+
+${p.points
+    .map((q, i) => `
+    // Point ${i + 1}
+    // X = ${q.x.toFixed(2)}
+    // Y = ${q.y.toFixed(2)}
+    // Heading = ${q.heading}°
+    // Speed = ${q.speed}%
+    // Action = ${q.action || "none"}
+
+    // chassis.moveTo(
+    //     ${q.x.toFixed(2)},
+    //     ${q.y.toFixed(2)},
+    //     ${q.heading.toFixed(1)}
+    // );
+`)
+    .join("")}
+}`;
+    }
+
+    function showCode() {
+        const h = $("featureModalHost");
+
+        if (!h) {
+            return;
+        }
+
+        h.innerHTML = `
+            <div class="modal-backdrop">
+                <div class="feature-modal">
+
+                    <div class="feature-modal-head">
+                        <strong>
+                            Generated Autonomous Code
+                        </strong>
+
+                        <span class="modal-spacer"></span>
+
+                        <button id="copyGen">
+                            Copy
+                        </button>
+
+                        <button id="dlGen">
+                            Download
+                        </button>
+
+                        <button id="closeGen">
+                            Close
+                        </button>
+                    </div>
+
+                    <div class="feature-modal-body">
+
+                        <div class="code-tabs">
+                            <button
+                                class="active"
+                                data-k="lem"
+                            >
+                                LemLib
+                            </button>
+
+                            <button data-k="ez">
+                                EZ-Template
+                            </button>
+
+                            <button data-k="json">
+                                JSON
+                            </button>
+                        </div>
+
+                        <textarea
+                            id="genText"
+                            readonly
+                        ></textarea>
+
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const ta = $("genText");
+
+        const setCode = kind => {
+            ta.value =
+                generateCode(kind);
+        };
+
+        h.querySelectorAll(
+            ".code-tabs button"
+        ).forEach(button => {
+            button.onclick = () => {
+                h.querySelectorAll(
+                    ".code-tabs button"
+                ).forEach(x =>
+                    x.classList.remove("active")
+                );
+
+                button.classList.add("active");
+
+                setCode(button.dataset.k);
+            };
+        });
+
+        $("copyGen").onclick = () => {
+            navigator.clipboard
+                .writeText(ta.value)
+                .then(() => toast("Copied"));
+        };
+
+        $("dlGen").onclick = () => {
+            const blob =
+                new Blob(
+                    [ta.value],
+                    {
+                        type: "text/plain"
+                    }
+                );
+
+            const url =
+                URL.createObjectURL(blob);
+
+            const a =
+                document.createElement("a");
+
+            a.href = url;
+            a.download =
+                "override-auton.cpp";
+
+            a.click();
+
+            URL.revokeObjectURL(url);
+        };
+
+        $("closeGen").onclick = () => {
+            h.innerHTML = "";
+        };
+
+        setCode("lem");
+    }
+
+    if ($("showCode")) {
+        $("showCode").onclick =
+            showCode;
+    }
+
+    /* SIMULATION */
+
+    let simulation = null;
+
+    function stopSimulation() {
+        if (simulation) {
+            cancelAnimationFrame(
+                simulation
+            );
+        }
+
+        simulation = null;
+
+        draw();
+    }
+
+    function simulate() {
+        stopSimulation();
+
+        const p =
+            state.paths[state.selectedPath];
+
+        if (
+            !p ||
+            p.points.length < 2
+        ) {
+            return toast(
+                "Add at least two waypoints"
+            );
+        }
+
+        let t = 0;
+
+        function step() {
+            t +=
+                0.006 *
+                (Number(p.maxSpeed) || 100) /
+                100;
+
+            if (t > 1) {
+                t = 1;
+            }
+
+            const sample = samplePath(p, t);
+
+            const x = sample.x;
+            const y = sample.y;
+            const h = sample.heading;
+
+            draw();
+
+            const s =
+                fieldToScreen(
+                    x,
+                    y
+                );
+
+            const fieldWidth =
+                (IMAGE_FIELD.right -
+                    IMAGE_FIELD.left) *
+                scale;
+
+            const pixelsPerInch =
+                fieldWidth /
+                VEX_FIELD;
+
+            const w =
+                Number(
+                    $("robotWidth")?.value
+                ) || 18;
+
+            const l =
+                Number(
+                    $("robotLength")?.value
+                ) || 18;
+
+            ctx.save();
+
+            ctx.translate(
+                s[0],
+                s[1]
+            );
+
+            ctx.rotate(
+                -h *
+                Math.PI /
+                180
+            );
+
+            ctx.fillStyle =
+                robotColor === "red"
+                    ? "rgba(225,55,75,.85)"
+                    : "rgba(55,125,225,.85)";
+
+            ctx.strokeStyle =
+                "#fff";
+
+            ctx.beginPath();
+
+            ctx.roundRect(
+                -l *
+                    pixelsPerInch /
+                    2,
+
+                -w *
+                    pixelsPerInch /
+                    2,
+
+                l *
+                    pixelsPerInch,
+
+                w *
+                    pixelsPerInch,
+
+                4
+            );
+
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+
+            if (t < 1) {
+                simulation =
+                    requestAnimationFrame(
+                        step
+                    );
+            } else {
+                simulation = null;
+            }
+        }
+
+        step();
+    }
+
+    const sec =
+        document.querySelector(
+            ".right .section:nth-child(2)"
+        );
+
+    if (
+        sec &&
+        !$("simBtn")
+    ) {
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "feature-row";
+
+        row.innerHTML = `
+            <button
+                class="feature-btn primary-feature"
+                id="simBtn"
+            >
+                ▶ Simulate
+            </button>
+
+            <button
+                class="feature-btn"
+                id="stopBtn"
+            >
+                ■ Stop
+            </button>
+        `;
+
+        sec.appendChild(row);
+
+        $("simBtn").onclick =
+            simulate;
+
+        $("stopBtn").onclick =
+            stopSimulation;
+    }
+
+    /* LOCAL AUTOSAVE */
+
+    setInterval(() => {
+        try {
+            localStorage.setItem(
+                "override-planner-autosave",
+                JSON.stringify(state)
+            );
+        } catch (e) {
+            console.warn(
+                "Autosave failed",
+                e
+            );
+        }
+    }, 5000);
+
+    setTimeout(() => {
+        if (typeof draw === "function") {
+            draw();
+        }
+    }, 0);
+})();
+
+/* ============================================================
+   CLEAN UI / VEX WORKFLOW FEATURES
+============================================================ */
+(() => {
+  const $ = id => document.getElementById(id);
+
+  function activePath(){
+    return state.paths[state.selectedPath];
+  }
+
+  function refreshStats(){
+    const p = activePath();
+    if(!p) return;
+
+    let distance = 0;
+    for(let i=1;i<p.points.length;i++){
+      distance += Math.hypot(
+        p.points[i].x-p.points[i-1].x,
+        p.points[i].y-p.points[i-1].y
+      );
+    }
+
+    const actions = p.points.filter(x => x.action).length;
+    const speed = Math.max(1, Number(p.maxSpeed)||100);
+    // Simple planner estimate: distance / nominal speed.
+    // This is only a planning estimate, not a robot timing prediction.
+    const time = distance / (speed * 18);
+
+    if($("statPoints")) $("statPoints").textContent = p.points.length;
+    if($("statDistance")) $("statDistance").textContent = distance.toFixed(1);
+    if($("statActions")) $("statActions").textContent = actions;
+    if($("statTime")) $("statTime").textContent = time.toFixed(1);
+    if($("activePathName")) $("activePathName").textContent = p.name;
+    if($("pathPointStatus")) $("pathPointStatus").textContent =
+      `${p.points.length} point${p.points.length===1?"":"s"}`;
+  }
+
+  const oldDraw = draw;
+  draw = function(){
+    oldDraw();
+    refreshStats();
+  };
+
+  // Cursor coordinate readout.
+  canvas.addEventListener("pointermove", e => {
+    const rect = canvas.getBoundingClientRect();
+    const [x,y] = screenToField(
+      e.clientX-rect.left,
+      e.clientY-rect.top
+    );
+    if($("coordsReadout")){
+      $("coordsReadout").textContent =
+        `X ${x.toFixed(1)} · Y ${y.toFixed(1)}`;
+    }
+  });
+
+  // Tool buttons.
+  let tool = "select";
+  function setTool(next){
+    tool = next;
+    ["toolSelect","toolAdd","toolPan"].forEach(id => {
+      const el = $(id);
+      if(el) el.classList.toggle(
+        "active",
+        id === "tool" + next.charAt(0).toUpperCase()+next.slice(1)
+      );
+    });
+    if($("fieldStatus")){
+      $("fieldStatus").textContent =
+        next === "add" ? "Add points" :
+        next === "pan" ? "Pan view" : "Select";
+    }
+  }
+  $("toolSelect")?.addEventListener("click",()=>setTool("select"));
+  $("toolAdd")?.addEventListener("click",()=>setTool("add"));
+  $("toolPan")?.addEventListener("click",()=>setTool("pan"));
+
+  // Snap toggle.
+  let snapEnabled = false;
+  $("snapToggle")?.addEventListener("click", e => {
+    snapEnabled = !snapEnabled;
+    e.currentTarget.classList.toggle("primary-feature", snapEnabled);
+    e.currentTarget.textContent = snapEnabled ? "Snap ON" : "Snap";
+  });
+
+  // Grid toggle.
+  $("gridToggle")?.addEventListener("click", e => {
+    const grid = $("gridOverlay");
+    if(!grid) return;
+    grid.classList.toggle("on");
+    e.currentTarget.classList.toggle("primary-feature", grid.classList.contains("on"));
+  });
+
+  $("centerPath")?.addEventListener("click", () => {
+    fit();
+    toast("Field centered");
+  });
+
+  $("clearSelection")?.addEventListener("click", () => {
+    state.selectedPoint = -1;
+    draw();
+    toast("Selection cleared");
+  });
+
+  function selectedIndex(){
+    return state.selectedPoint;
+  }
+
+  $("deletePoint")?.addEventListener("click", () => {
+    const p = activePath(), i = selectedIndex();
+    if(!p || i < 0) return toast("Select a point first");
+    snap?.();
+    p.points.splice(i,1);
+    state.selectedPoint = Math.min(i,p.points.length-1);
+    draw();
+    toast("Point deleted");
+  });
+
+  $("duplicatePoint")?.addEventListener("click", () => {
+    const p = activePath(), i = selectedIndex();
+    if(!p || i < 0) return toast("Select a point first");
+    const q = clone(p.points[i]);
+    q.x = Math.max(-72, Math.min(72, q.x + 3));
+    q.y = Math.max(-72, Math.min(72, q.y + 3));
+    p.points.splice(i+1,0,q);
+    state.selectedPoint = i+1;
+    draw();
+    toast("Point duplicated");
+  });
+
+  $("autoHeadings")?.addEventListener("click", () => {
+    const p = activePath();
+    if(!p || p.points.length < 2) return toast("Need at least two points");
+    p.points.forEach((q,i) => {
+      const next = p.points[Math.min(i+1,p.points.length-1)];
+      const prev = p.points[Math.max(i-1,0)];
+      const dx = (i === p.points.length-1 ? q.x-prev.x : next.x-q.x);
+      const dy = (i === p.points.length-1 ? q.y-prev.y : next.y-q.y);
+      let h = -Math.atan2(dy,dx)*180/Math.PI;
+      if(h < 0) h += 360;
+      q.heading = Math.round(h);
+    });
+    draw();
+    toast("Headings calculated");
+  });
+
+  $("reverseHeadings")?.addEventListener("click", () => {
+    const p = activePath();
+    if(!p) return;
+    p.points.forEach(q => q.heading = (Number(q.heading||0)+180)%360);
+    draw();
+    toast("Headings reversed");
+  });
+
+  // Make add mode actually useful without breaking normal selection.
+  canvas.addEventListener("pointerdown", e => {
+    if(tool !== "add" || e.button !== 0) return;
+    const rect = canvas.getBoundingClientRect();
+    let [x,y] = screenToField(e.clientX-rect.left,e.clientY-rect.top);
+    if(snapEnabled){
+      x = Math.round(x/3)*3;
+      y = Math.round(y/3)*3;
+    }
+    if(x < -72 || x > 72 || y < -72 || y > 72) return;
+    const p = activePath();
+    if(!p) return;
+    p.points.push({x,y,heading:0,speed:80,action:"",segmentMode:"straight"});
+    state.selectedPoint = p.points.length-1;
+    draw();
+  }, true);
+
+  // Keep a clean initial state.
+  setTool("select");
+  setTimeout(refreshStats, 0);
+})();
+
+</script>
+<script>
+
+/* ============================================================
+   EZPATH SEGMENT MODES + REALISTIC CODE GENERATION
+   Sources used:
+   - LemLib Chassis API / configuration docs
+   - EZ-Template driving + odometry docs
+   Segment mode is stored on the destination point:
+     point.segmentMode === "straight" | "curved"
+============================================================ */
+(() => {
+  const $ = id => document.getElementById(id);
+
+  function currentPath(){
+    return state.paths[state.selectedPath];
+  }
+
+  function ensureSegmentModes(){
+    for(const p of state.paths || []){
+      if(!p.points) continue;
+      p.points.forEach((pt,i)=>{
+        if(i === 0){
+          pt.segmentMode = "start";
+        } else if(pt.segmentMode !== "curved" && pt.segmentMode !== "straight"){
+          pt.segmentMode = p.pathType === "curved" ? "curved" : "straight";
+        }
+      });
+    }
+  }
+
+  ensureSegmentModes();
+
+  function updateSegmentUI(){
+    const p = currentPath();
+    const i = state.selectedPoint;
+    const box = $("segmentModeBox");
+    if(!box) return;
+
+    const s = $("segmentStraight");
+    const c = $("segmentCurved");
+
+    if(!p || i <= 0 || !p.points[i]){
+      box.style.display = i === 0 ? "block" : "none";
+      if(i === 0){
+        s.classList.remove("active");
+        c.classList.remove("active");
+      }
+      return;
+    }
+
+    box.style.display = "block";
+    const mode = p.points[i].segmentMode || "straight";
+    s.classList.toggle("active", mode === "straight");
+    c.classList.toggle("active", mode === "curved");
+  }
+
+  function setSegmentMode(mode){
+    const p = currentPath();
+    const i = state.selectedPoint;
+    if(!p || i <= 0 || !p.points[i]){
+      if(typeof toast === "function") toast("Select a point after the start point");
+      return;
+    }
+
+    p.points[i].segmentMode = mode;
+    draw();
+    updateSegmentUI();
+  }
+
+  $("segmentStraight")?.addEventListener("click",()=>setSegmentMode("straight"));
+  $("segmentCurved")?.addEventListener("click",()=>setSegmentMode("curved"));
+
+  // Hook draw without replacing the existing renderer.
+  const baseDraw = draw;
+  draw = function(){
+    baseDraw();
+    updateSegmentUI();
+  };
+
+  // Generate code from the exact segment choices.
+  function generateControllerCode(kind){
+    const p = currentPath();
+    if(!p) return "";
+
+    const pts = p.points || [];
+    let code = "";
+
+    if(kind === "lemlib"){
+      code += `// EZPATH → LemLib\n`;
+      code += `// Segment types are preserved individually.\n`;
+      code += `// Coordinates: X/Y in inches, heading in degrees.\n\n`;
+      code += `void ${safeName(p.name)}() {\n`;
+
+      pts.forEach((q,i)=>{
+        if(i === 0){
+          code += `    // Start: (${q.x.toFixed(1)}, ${q.y.toFixed(1)}) @ ${q.heading.toFixed(0)}°\n`;
+          code += `    chassis.setPose(${q.x.toFixed(1)}, ${q.y.toFixed(1)}, ${q.heading.toFixed(0)});\n\n`;
+          return;
+        }
+
+        const mode = q.segmentMode || "straight";
+
+        code += `    // Segment ${i}: ${mode.toUpperCase()} → (${q.x.toFixed(1)}, ${q.y.toFixed(1)})\n`;
+
+        if(mode === "straight"){
+          code += `    chassis.moveToPoint(${q.x.toFixed(1)}, ${q.y.toFixed(1)}, ${p.timeout || 3000});\n`;
+        } else {
+          // LemLib does not expose a generic "draw this arbitrary curve" call
+          // equivalent to this planner's visual spline. Use a point-following
+          // sequence so the generated code remains valid LemLib-style motion.
+          code += `    // Curved planner segment: use your LemLib path-following routine here.\n`;
+          code += `    chassis.moveToPoint(${q.x.toFixed(1)}, ${q.y.toFixed(1)}, ${p.timeout || 3000});\n`;
+        }
+
+        code += `    chassis.waitUntilDone();\n\n`;
+
+        if(q.action){
+          code += `    // Action: ${q.action}\n\n`;
+        }
+      });
+
+      code += `}\n`;
+      return code;
+    }
+
+    if(kind === "eztemplate"){
+      code += `// EZPATH → EZ-Template\n`;
+      code += `// Straight segments use PID odom point-to-point.\n`;
+      code += `// Curved segments use EZ-Template path-following / PP functions.\n\n`;
+      code += `void ${safeName(p.name)}() {\n`;
+
+      pts.forEach((q,i)=>{
+        if(i === 0){
+          code += `    chassis.odom_xyt_set(${q.x.toFixed(1)}_in, ${q.y.toFixed(1)}_in, ${q.heading.toFixed(0)}_deg);\n\n`;
+          return;
+        }
+
+        const mode = q.segmentMode || "straight";
+
+        if(mode === "straight"){
+          code += `    // Straight segment ${i}\n`;
+          code += `    chassis.pid_odom_ptp_set({{${q.x.toFixed(1)}_in, ${q.y.toFixed(1)}_in}, ez::fwd, ${Math.round(q.speed || 110)}});\n`;
+          code += `    chassis.pid_wait();\n\n`;
+        } else {
+          code += `    // Curved segment ${i}\n`;
+          code += `    // Add this point to the PP/smoothed path for the curved section.\n`;
+          code += `    chassis.pid_odom_pp_set({{{${q.x.toFixed(1)}_in, ${q.y.toFixed(1)}_in}, ez::fwd, ${Math.round(q.speed || 110)}}});\n`;
+          code += `    chassis.pid_wait();\n\n`;
+        }
+
+        if(q.action) code += `    // Action: ${q.action}\n\n`;
+      });
+
+      code += `}\n`;
+      return code;
+    }
+
+    return "";
+  }
+
+  function safeName(name){
+    return String(name || "autonomousPath")
+      .replace(/[^a-zA-Z0-9_]+/g,"_")
+      .replace(/^[^a-zA-Z_]+/,"")
+      || "autonomousPath";
+  }
+
+  // Replace the code modal content only when showCode is clicked.
+  $("showCode")?.addEventListener("click", ()=>{
+    const host = $("featureModalHost");
+    if(!host) return;
+
+    host.innerHTML = `
+      <div class="modal-backdrop">
+        <div class="feature-modal" style="max-width:900px">
+          <div class="feature-modal-head">
+            <strong>Generated Autonomous Code</strong>
+            <button id="closeGeneratedCode">Close</button>
+          </div>
+          <div class="code-tabs">
+            <button class="active" data-code-tab="lemlib">LemLib</button>
+            <button data-code-tab="eztemplate">EZ-Template</button>
+          </div>
+          <div style="padding:12px">
+            <pre id="generatedCodeBox" style="max-height:65vh;overflow:auto;margin:0"></pre>
+          </div>
+        </div>
+      </div>`;
+
+    const pre = $("generatedCodeBox");
+    const tabs = [...host.querySelectorAll("[data-code-tab]")];
+
+    function render(kind){
+      pre.textContent = generateControllerCode(kind);
+      tabs.forEach(t=>t.classList.toggle("active",t.dataset.codeTab===kind));
+    }
+
+    tabs.forEach(t=>t.addEventListener("click",()=>render(t.dataset.codeTab)));
+    $("closeGeneratedCode")?.addEventListener("click",()=>host.innerHTML="");
+    render("lemlib");
+  });
+
+  // Ensure newly-created points get a segment mode.
+  const oldPushPath = $("newPath");
+  oldPushPath?.addEventListener("click",()=>{
+    setTimeout(ensureSegmentModes,0);
+  });
+
+  // Show segment modes in the timeline by updating text after normal draw.
+  const oldRefresh = refreshStats;
+  refreshStats = function(){
+    oldRefresh();
+    const p = currentPath();
+    const timeline = $("timeline");
+    if(!p || !timeline) return;
+
+    [...timeline.children].forEach((el,i)=>{
+      if(i <= 0) return;
+      const badge = el.querySelector(".segment-badge");
+      const mode = p.points[i]?.segmentMode || "straight";
+      if(!badge){
+        const b = document.createElement("span");
+        b.className = "segment-badge";
+        b.textContent = mode;
+        el.style.position = "relative";
+        el.appendChild(b);
+      } else {
+        badge.textContent = mode;
+      }
+    });
+  };
+
+  setTimeout(updateSegmentUI,50);
+})();
+
+</script>
