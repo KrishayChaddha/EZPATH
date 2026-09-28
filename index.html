@@ -4873,3 +4873,189 @@ ${p.points
 })();
 
 </script>
+<style>
+/* ===== SIM STUDIO ===== */
+.main{transition:grid-template-columns .55s cubic-bezier(.7,0,.2,1)}
+.sidebar{transition:opacity .35s,transform .55s cubic-bezier(.7,0,.2,1)}
+body.sim-mode .main{grid-template-columns:0 1fr 0!important}
+body.sim-mode .sidebar{opacity:0;pointer-events:none;overflow:hidden;border:0}
+body.sim-mode .sidebar.left{transform:translateX(-60px)}body.sim-mode .sidebar.right{transform:translateX(60px)}
+body.sim-mode .workspace-tools{display:none}
+#simOverlay{position:absolute;inset:0;z-index:20;pointer-events:none;width:100%;height:100%}
+#simOverlay.draw{pointer-events:auto;cursor:crosshair}
+#simIntro{position:fixed;inset:0;z-index:999;pointer-events:none;background:#386fd2;clip-path:circle(0 at 50% 50%);display:flex;align-items:center;justify-content:center;font:900 44px Arial;letter-spacing:.3em;color:#fff}
+#simIntro.go{animation:wipe 1s ease forwards}
+@keyframes wipe{0%{clip-path:circle(0 at 50% 50%);opacity:1}55%{clip-path:circle(150% at 50% 50%);opacity:1}100%{clip-path:circle(150% at 50% 50%);opacity:0}}
+#simDock{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#101318f2;border-top:1px solid #292f37;backdrop-filter:blur(10px);padding:10px 14px;transform:translateY(110%);transition:transform .55s cubic-bezier(.2,.8,.2,1) .25s;font-size:12px}
+body.sim-mode #simDock{transform:none}
+#simDock .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+#simDock button,#simDock select{background:#181d23;border:1px solid #303741;color:#e0e5eb;padding:6px 10px;border-radius:6px;cursor:pointer}
+#simDock button:hover{background:#242a32}#simDock .on{background:#386fd2;border-color:#5184e4}
+#simDock input[type=number]{width:52px;background:#0b0e12;border:1px solid #303741;color:#e7ebf0;border-radius:5px;padding:4px}
+#simDock label{display:inline-flex;gap:4px;align-items:center;margin:0;color:#8b95a1;font-size:11px}
+#simScrub{flex:1;min-width:180px}#simTime{font-variant-numeric:tabular-nums;min-width:120px}
+#simTimeline{height:14px;border-radius:4px;background:#0b0e12;display:flex;overflow:hidden;margin-bottom:8px;border:1px solid #292f37}
+#simTimeline div{height:100%;border-right:1px solid #080a0d}
+#simPaths label{color:#e0e5eb;margin-right:6px}
+.simtag{color:#7d8793;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+</style>
+<div id="simIntro">SIMULATE</div>
+<div id="simDock">
+ <div class="row">
+  <button id="sPlay" class="on">▶ Play</button><button id="sReset">⟲</button>
+  <input type="range" id="simScrub" min="0" max="1000" value="0"><span id="simTime">0.0 / 0.0s</span>
+  <label>Speed <select id="sRate"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option><option>4</option></select>×</label>
+  <label><input type="checkbox" id="sTrail" checked>Trail</label>
+  <span class="spacer" style="flex:1"></span>
+  <button id="sDraw">✏ Draw ally path</button><button id="sClearAlly">Clear ally</button>
+  <button id="sExport">⬇ JSON</button><button id="sImport">⬆ Import</button><button id="sShare">🔗 Copy share code</button>
+  <button id="sExit">✕ Exit</button><input type="file" id="sFile" accept=".json" hidden>
+ </div>
+ <div id="simTimeline"></div>
+ <div class="row"><span class="simtag">Timings (s)</span>
+  <label>Intake<input type="number" id="t_intake" step=".1" min="0"></label>
+  <label>Outtake<input type="number" id="t_outtake" step=".1" min="0"></label>
+  <label>Score<input type="number" id="t_score" step=".1" min="0"></label>
+  <label>Toggle<input type="number" id="t_toggle" step=".1" min="0"></label>
+  <label>Loader<input type="number" id="t_loader" step=".1" min="0"></label>
+  <label>Wait<input type="number" id="t_wait" step=".1" min="0"></label>
+  <label>Drive in/s<input type="number" id="t_drive" step="1" min="1"></label>
+  <label>Auto limit<input type="number" id="t_limit" step="1" min="1"></label>
+  <span id="simTotal" style="font-weight:700"></span>
+ </div>
+ <div class="row" id="simPaths"><span class="simtag">Run paths</span></div>
+</div>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const T = {intake:1.2,outtake:0.8,score:0.6,toggle:0.4,loader:1.0,wait:0.5,drive:40,limit:15};
+const COL = {intake:"#4fd28a",outtake:"#f0a04b",score:"#f2d24b",toggle:"#b58cff",loader:"#4bc6f0",wait:"#8b95a1"};
+let ally = [], enabled = {}, tl = [], total = 0, t = 0, playing = false, drawing = false, cur = null, last = 0, on = false;
+const F = $("fieldContainer"), ov = document.createElement("canvas");
+ov.id = "simOverlay"; F.appendChild(ov);
+const oc = ov.getContext("2d");
+const btn = document.createElement("button");
+btn.id = "simMode"; btn.className = "primary"; btn.textContent = "🎬 Simulator";
+$("showCode").before(btn);
+["intake","outtake","score","toggle","loader","wait","drive","limit"].forEach(k => {
+  const e = $("t_" + k); e.value = T[k];
+  e.oninput = () => { T[k] = Math.max(0, +e.value || 0); build(); };
+});
+function build() {
+  tl = []; let time = 0, pos = null;
+  state.paths.forEach((p, pi) => {
+    if (enabled[pi] === false || !p.points.length) return;
+    const n = p.points.length, v = Math.max(1, T.drive * (p.maxSpeed || 100) / 100);
+    const at = q => ({x:q.x, y:q.y, h:q.heading || 0});
+    if (pos && (pos.x !== p.points[0].x || pos.y !== p.points[0].y)) pos = null; // new start = teleport (placed by driver)
+    p.points.forEach((q, i) => {
+      const d = T[q.action] || 0;
+      if (q.action && d > 0) { tl.push({t0:time, t1:time + d, type:"act", a:q.action, pos:at(q), pi}); time += d; }
+      if (i < n - 1) {
+        const pts = [], N = 24; let len = 0;
+        for (let k = 0; k <= N; k++) {
+          const s = samplePath(p, (i + k / N) / (n - 1));
+          if (k) len += Math.hypot(s.x - pts[k-1].x, s.y - pts[k-1].y);
+          pts.push({x:s.x, y:s.y, h:s.heading});
+        }
+        const dur = len / v; tl.push({t0:time, t1:time + dur, type:"move", pts, pi}); time += dur;
+      }
+    });
+  });
+  total = time;
+  const bar = $("simTimeline"); bar.innerHTML = "";
+  tl.forEach(s => { const d = document.createElement("div"); d.style.width = (s.t1 - s.t0) / Math.max(total, .001) * 100 + "%";
+    d.style.background = s.type === "move" ? "#386fd2" : COL[s.a] || "#888"; d.title = s.type === "move" ? "Drive" : s.a; bar.appendChild(d); });
+  const over = total > T.limit;
+  $("simTotal").textContent = `Total ${total.toFixed(1)}s / ${T.limit}s ${over ? "⚠ OVER" : "✓"}`;
+  $("simTotal").style.color = over ? "#ff7777" : "#67d39a";
+  const box = $("simPaths"); box.querySelectorAll("label").forEach(l => l.remove());
+  state.paths.forEach((p, i) => { const l = document.createElement("label"); const c = document.createElement("input");
+    c.type = "checkbox"; c.checked = enabled[i] !== false; c.onchange = () => { enabled[i] = c.checked; build(); };
+    l.append(c, p.name); box.appendChild(l); });
+}
+function poseAt(time) {
+  if (!tl.length) return null;
+  for (const s of tl) if (time <= s.t1 || s === tl[tl.length - 1]) {
+    if (s.type === "act") return {...s.pos, act:s.a, prog:(time - s.t0) / (s.t1 - s.t0 || 1)};
+    const f = Math.min(1, Math.max(0, (time - s.t0) / (s.t1 - s.t0 || 1))), i = f * (s.pts.length - 1), j = Math.min(s.pts.length - 2, Math.floor(i)), g = i - j;
+    const a = s.pts[j], b = s.pts[j + 1]; let dh = ((b.h - a.h + 540) % 360) - 180;
+    return {x:a.x + (b.x - a.x) * g, y:a.y + (b.y - a.y) * g, h:a.h + dh * g};
+  }
+}
+function sizeOv() { const r = F.getBoundingClientRect(), d = devicePixelRatio || 1;
+  ov.width = r.width * d; ov.height = r.height * d; oc.setTransform(d,0,0,d,0,0); }
+function line(pts, color, dash, w) {
+  if (pts.length < 2) return; oc.beginPath(); pts.forEach((q, i) => { const s = fieldToScreen(q.x, q.y); i ? oc.lineTo(s[0], s[1]) : oc.moveTo(s[0], s[1]); });
+  oc.strokeStyle = color; oc.lineWidth = w || 3; oc.setLineDash(dash || []); oc.stroke(); oc.setLineDash([]);
+}
+function robot(p, color, label) {
+  const ppi = (IMAGE_FIELD.right - IMAGE_FIELD.left) * scale / VEX_FIELD, s = fieldToScreen(p.x, p.y);
+  const w = (+$("robotWidth").value || 18) * ppi, l = (+$("robotLength").value || 18) * ppi;
+  oc.save(); oc.translate(s[0], s[1]); oc.rotate(-(p.h || 0) * Math.PI / 180);
+  oc.fillStyle = color + "aa"; oc.strokeStyle = color; oc.lineWidth = 2; oc.fillRect(-l/2, -w/2, l, w); oc.strokeRect(-l/2, -w/2, l, w);
+  oc.fillStyle = "#fff"; oc.beginPath(); oc.moveTo(l/2, 0); oc.lineTo(l/2 - 9, -6); oc.lineTo(l/2 - 9, 6); oc.fill(); oc.restore();
+  if (label) { oc.font = "bold 12px Arial"; oc.fillStyle = "#fff"; oc.textAlign = "center"; oc.fillText(label, s[0], s[1] - Math.max(w, l) / 2 - 8); }
+}
+function frame(now) {
+  if (!on) return; requestAnimationFrame(frame);
+  const dt = (now - last) / 1000; last = now;
+  if (playing) { t += dt * +$("sRate").value; if (t >= total) { t = total; playing = false; $("sPlay").textContent = "▶ Play"; } }
+  $("simScrub").value = total ? t / total * 1000 : 0;
+  $("simTime").textContent = `${t.toFixed(1)} / ${total.toFixed(1)}s`;
+  oc.clearRect(0, 0, ov.width, ov.height);
+  state.paths.forEach((p, i) => { if (enabled[i] !== false) { const pts = []; for (let k = 0; k <= 60; k++) pts.push(samplePath(p, k / 60)); line(pts, "#ffffff55", [6,6], 2); } });
+  ally.forEach(a => line(a.pts, "#c084fc", [8,5], 3));
+  if ($("sTrail").checked) { const pts = []; for (let x = 0; x <= t; x += .05) { const q = poseAt(x); if (q) pts.push(q); } line(pts, "#67d39aaa", [], 4); }
+  const r = poseAt(t);
+  ally.forEach((a, k) => { if (a.pts.length > 1) { const v = T.drive, d = Math.min(t * v, a.len), pts = a.pts; let acc = 0;
+    for (let i = 1; i < pts.length; i++) { const sl = Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
+      if (acc + sl >= d || i === pts.length - 1) { const g = sl ? Math.min(1, (d - acc) / sl) : 0;
+        robot({x:pts[i-1].x + (pts[i].x - pts[i-1].x) * g, y:pts[i-1].y + (pts[i].y - pts[i-1].y) * g, h:-Math.atan2(pts[i].y - pts[i-1].y, pts[i].x - pts[i-1].x) * 180 / Math.PI}, "#c084fc", "Ally " + (k + 1)); break; }
+      acc += sl; } } });
+  if (r) robot(r, "#67d39a", r.act ? r.act.toUpperCase() : "");
+  if (cur) line(cur, "#c084fc", [], 4);
+}
+function start(){ if (on) return; on = true; document.body.classList.add("sim-mode"); $("simIntro").classList.add("go");
+  setTimeout(() => $("simIntro").classList.remove("go"), 1100);
+  build(); t = 0; playing = false; $("sPlay").textContent = "▶ Play";
+  const fix = () => { resize(); fit(); sizeOv(); draw(); };
+  setTimeout(fix, 620); setTimeout(fix, 900); last = performance.now(); requestAnimationFrame(frame); }
+function stop(){ on = false; drawing = false; ov.classList.remove("draw"); document.body.classList.remove("sim-mode");
+  const fix = () => { resize(); fit(); draw(); }; setTimeout(fix, 620); setTimeout(fix, 900); }
+btn.onclick = start; $("sExit").onclick = stop;
+addEventListener("resize", () => on && sizeOv());
+addEventListener("keydown", e => { if (on && e.key === "Escape") stop(); if (on && e.key === " " && !/INPUT|SELECT/.test(e.target.tagName)) { e.preventDefault(); $("sPlay").click(); } });
+$("sPlay").onclick = () => { if (t >= total) t = 0; playing = !playing; $("sPlay").textContent = playing ? "⏸ Pause" : "▶ Play"; };
+$("sReset").onclick = () => { t = 0; playing = false; $("sPlay").textContent = "▶ Play"; };
+$("simScrub").oninput = e => { t = e.target.value / 1000 * total; playing = false; $("sPlay").textContent = "▶ Play"; };
+$("sDraw").onclick = () => { drawing = !drawing; ov.classList.toggle("draw", drawing); $("sDraw").classList.toggle("on", drawing); };
+$("sClearAlly").onclick = () => { ally = []; };
+function addAlly(pts) { let len = 0; for (let i = 1; i < pts.length; i++) len += Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y); ally.push({pts, len}); }
+ov.addEventListener("pointerdown", e => { if (!drawing) return; ov.setPointerCapture(e.pointerId); cur = []; add(e); });
+ov.addEventListener("pointermove", e => { if (cur) add(e); });
+ov.addEventListener("pointerup", () => { if (cur && cur.length > 1) addAlly(cur); cur = null; });
+function add(e) { const r = ov.getBoundingClientRect(), [x, y] = screenToField(e.clientX - r.left, e.clientY - r.top), l = cur[cur.length - 1];
+  if (!l || Math.hypot(x - l.x, y - l.y) > 1.5) cur.push({x:+x.toFixed(1), y:+y.toFixed(1)}); }
+const bundle = () => ({app:"EZPATH", version:2, paths:state.paths, timings:T, alliancePaths:ally.map(a => a.pts)});
+$("sExport").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(bundle(), null, 2)], {type:"application/json"}));
+  a.download = "ezpath-auto.json"; a.click(); };
+$("sShare").onclick = async () => { const code = btoa(unescape(encodeURIComponent(JSON.stringify(bundle()))));
+  try { await navigator.clipboard.writeText(code); alert("Share code copied! Your alliance can paste it via Import."); } catch { prompt("Copy your share code:", code); } };
+function load(o, replace) {
+  if (o.timings) { Object.assign(T, o.timings); Object.keys(T).forEach(k => $("t_" + k).value = T[k]); }
+  if (o.alliancePaths) o.alliancePaths.forEach(addAlly);
+  if (Array.isArray(o.paths) && o.paths.length) {
+    if (replace) { state.paths = o.paths; state.selectedPath = 0; state.selectedPoint = -1; enabled = {}; }
+    else o.paths.forEach(p => { const pts = []; for (let k = 0; k <= 60; k++) { const s = samplePath(p, k / 60); pts.push({x:+s.x.toFixed(1), y:+s.y.toFixed(1)}); } addAlly(pts); });
+  }
+  build(); draw();
+}
+$("sImport").onclick = () => { const s = prompt("Paste a share code or JSON — or leave blank to pick a .json file:"); if (!s) return $("sFile").click();
+  try { const o = JSON.parse(s.trim().startsWith("{") ? s : decodeURIComponent(escape(atob(s.trim())))); load(o, confirm("OK = replace MY paths with these.\nCancel = add them as ALLY paths.")); } catch { alert("Couldn't read that code."); } };
+$("sFile").onchange = e => { const f = e.target.files[0]; if (!f) return; f.text().then(s => { try { load(JSON.parse(s), confirm("OK = replace MY paths with these.\nCancel = add them as ALLY paths.")); } catch { alert("Invalid JSON file."); } }); e.target.value = ""; };
+})();
+</script>
+
+</body>
+</html>
