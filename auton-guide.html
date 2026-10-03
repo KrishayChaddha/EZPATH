@@ -1,1037 +1,390 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>EZPATH — Simple LemLib &amp; EZ-Template Guide</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EZPATH — Tuning Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* EZPATH theme — Midnight (shared with the planner) */
-:root{
-  --bg:#0a0b0d; --dots:#181b1f;
-  --card:#111316; --card2:#16191d; --hover:#1d2126; --input:#0b0d0f;
-  --line:#24282e; --line2:#1b1e23;
-  --ink:#eceff3; --ink2:#c0c7cf; --mut:#818995;
-  --ac:#3ecf9b; --ac2:#5ddcae; --acbg:#10302a; --acink:#05231a;
-  --amber:#e8b85c; --blue:#6aa8ff; --violet:#a792ff;
-  --r:16px; --r2:10px;
-  --font:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  color-scheme:dark;
-}
+:root{--bg:#0a0b0d;--dots:#181b1f;--card:#111316;--card2:#16191d;--hover:#1d2126;--input:#0b0d0f;--line:#24282e;--line2:#1b1e23;--ink:#eceff3;--ink2:#c0c7cf;--mut:#818995;--ac:#3ecf9b;--ac2:#5ddcae;--acbg:#10302a;--acink:#05231a;--amber:#e8b85c;--blue:#6aa8ff;--violet:#a792ff;--r:16px;--r2:10px;--font:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;color-scheme:dark}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{
-  margin:0;background-color:var(--bg);
-  background-image:radial-gradient(var(--dots) 1px,transparent 1.2px);background-size:22px 22px;
-  color:var(--ink);font-family:var(--font);font-size:14.5px;line-height:1.7;-webkit-font-smoothing:antialiased;
-}
-a{color:inherit}
-
-/* ---------- top bar (same as planner) ---------- */
-.topbar{
-  position:sticky;top:0;z-index:50;height:64px;padding:0 24px;display:flex;align-items:center;gap:12px;
-  background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
-}
+body{margin:0;background:var(--bg) radial-gradient(var(--dots) 1px,transparent 1.2px) 0 0/22px 22px;color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.7}
+.topbar{position:sticky;top:0;z-index:50;height:64px;padding:0 24px;display:flex;align-items:center;gap:12px;background:var(--card);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:11px}
-.brand-mark{width:34px;height:34px;border-radius:10px;background:var(--ac);color:var(--acink);display:grid;place-items:center}
-.brand-mark svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.brand-text{display:flex;flex-direction:column;line-height:1.1}
-.logo{font-size:17px;font-weight:800;letter-spacing:-.02em}
-.logo span{color:var(--ac)}
-.brand small{font-size:10px;font-weight:500;color:var(--mut);margin-top:3px}
+.mark{width:34px;height:34px;border-radius:10px;background:var(--ac);color:var(--acink);display:grid;place-items:center}
+.mark svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.logo{font-size:17px;font-weight:800}.logo span{color:var(--ac)}
 .spacer{flex:1}
-.badge{font-size:10.5px;font-weight:600;letter-spacing:.06em;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
-.btn{
-  display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 15px;border-radius:var(--r2);text-decoration:none;
-  font-size:12.5px;font-weight:700;background:var(--ac);color:var(--acink);border:1px solid var(--ac);transition:background .15s;
-}
+.btn{display:inline-flex;align-items:center;height:38px;padding:0 16px;border-radius:var(--r2);text-decoration:none;font-size:13px;font-weight:700;background:var(--ac);color:var(--acink)}
 .btn:hover{background:var(--ac2)}
-.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-
-/* ---------- layout ---------- */
 .wrap{max-width:1240px;margin:0 auto;padding:24px 24px 80px}
 .layout{display:grid;grid-template-columns:232px minmax(0,1fr);gap:24px;align-items:start}
-main{min-width:0}
-section[id]{scroll-margin-top:86px}
-
-.sidebar{
-  position:sticky;top:88px;max-height:calc(100vh - 110px);overflow-y:auto;
-  background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;
-  scrollbar-width:thin;scrollbar-color:var(--line) transparent;
-}
-.sidebar-title{font-size:12px;font-weight:700;color:var(--ink);padding:4px 10px 12px;display:flex;align-items:center}
-.sidebar-title::after{content:"";flex:1;height:1px;background:var(--line2);margin-left:12px}
-.sidebar a{
-  display:block;text-decoration:none;color:var(--ink2);font-size:13px;font-weight:600;
-  padding:8px 10px;border-radius:var(--r2);transition:background .15s,color .15s;
-}
-.sidebar a.sub{font-weight:500;color:var(--mut);padding-left:24px;font-size:12.5px}
+main{min-width:0}section[id]{scroll-margin-top:86px}
+.sidebar{position:sticky;top:88px;max-height:calc(100vh - 110px);overflow-y:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.sidebar b{display:block;font-size:12px;padding:4px 10px 10px}
+.sidebar a{display:block;text-decoration:none;color:var(--ink2);font-size:13px;font-weight:600;padding:8px 10px;border-radius:var(--r2)}
+.sidebar a.sub{font-weight:500;color:var(--mut);padding-left:24px}
 .sidebar a:hover{background:var(--card2);color:var(--ink)}
 .sidebar a.active{background:var(--acbg);color:var(--ac)}
-
-/* ---------- hero ---------- */
-.hero{padding:34px 4px 18px}
-.eyebrow{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ac);margin-bottom:14px}
-.hero h1{font-size:46px;line-height:1.05;letter-spacing:-.035em;font-weight:800;margin:0 0 16px}
+.hero{padding:30px 4px 10px}
+.hero h1{font-size:44px;line-height:1.05;letter-spacing:-.03em;font-weight:800;margin:0 0 14px}
 .hero h1 span{color:var(--ac)}
-.hero p{max-width:760px;color:var(--ink2);font-size:16.5px;margin:0}
-.hero b{color:var(--ink)}
-.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
-.tags span{border:1px solid var(--line);background:var(--card);padding:6px 13px;border-radius:999px;font-size:12px;font-weight:600;color:var(--ink2)}
-
-/* ---------- cards ---------- */
-.card{margin:16px 0;padding:28px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(0,0,0,.45)}
-.card h2{margin:0 0 12px;font-size:23px;font-weight:800;letter-spacing:-.02em}
-.card h3{margin:28px 0 10px;font-size:16px;font-weight:700;letter-spacing:-.01em}
-.card p{color:var(--ink2);margin:10px 0}
-.card li{color:var(--ink2);margin:7px 0}
-.card b,.card strong{color:var(--ink)}
-.card ul,.card ol{padding-left:22px}
+.hero p{max-width:640px;color:var(--ink2);font-size:17px;margin:0}
+.card{margin:16px 0;padding:28px;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+.card h2{margin:0 0 12px;font-size:23px;font-weight:800}
+.card h3{margin:26px 0 8px;font-size:16px}
+.card p,.card li{color:var(--ink2);margin:8px 0}
+.card b{color:var(--ink)}
 .card li::marker{color:var(--ac)}
-
-.steps{display:grid;gap:14px;margin-top:18px}
-.step{display:grid;grid-template-columns:38px 1fr;gap:14px;align-items:start}
+.tag{display:inline-block;padding:4px 10px;border-radius:7px;font:700 10.5px var(--mono);margin-bottom:10px;background:var(--acbg);color:var(--ac)}
+.tag.lem{background:#1d1a33;color:var(--violet)}
+.steps{display:grid;gap:12px;margin-top:14px}
+.step{display:grid;grid-template-columns:38px 1fr;gap:12px}
 .num{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--acbg);color:var(--ac);font:700 13px var(--mono)}
-.step b{color:var(--ink)}
-
-.measure-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
-.measure{padding:18px;background:var(--card2);border:1px solid var(--line2);border-radius:13px}
-.measure strong{display:block;color:var(--ac);margin-bottom:6px;font-size:14px}
-.measure span{color:var(--ink2);font-size:13.5px;line-height:1.6}
-
-/* ---------- callouts ---------- */
-.tip,.warning,.info,.success{
-  margin:18px 0;padding:14px 18px;border-radius:12px;border:1px solid var(--line2);border-left-width:3px;
-  background:var(--card2);color:var(--ink2);font-size:14px;
-}
-.tip b,.warning b,.info b,.success b{color:var(--ink)}
-.tip{border-left-color:var(--ac)}
-.warning{border-left-color:var(--amber)}
-.info{border-left-color:var(--blue)}
-.success{border-left-color:var(--violet)}
-
-.framework{display:inline-block;padding:4px 10px;border-radius:7px;font:700 10.5px var(--mono);letter-spacing:.06em;margin-bottom:10px;text-transform:uppercase}
-.framework.ez{background:var(--acbg);color:var(--ac)}
-.framework.lemlib{background:#1d1a33;color:var(--violet)}
-
-/* ---------- code ---------- */
-pre{overflow-x:auto;background:var(--input);border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.grid div{padding:16px;background:var(--card2);border:1px solid var(--line2);border-radius:13px;font-size:14px;color:var(--ink2)}
+.grid b{display:block;color:var(--ac);margin-bottom:4px}
+.note{margin:16px 0;padding:14px 18px;border-radius:12px;border:1px solid var(--line2);border-left:3px solid var(--ac);background:var(--card2);color:var(--ink2);font-size:14px}
+.note.warn{border-left-color:var(--amber)}.note.info{border-left-color:var(--blue)}
+.note b{color:var(--ink)}
+pre{overflow-x:auto;background:var(--input);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
 code{font-family:var(--mono);font-size:12.5px;color:#d9e2ea;line-height:1.65}
-p code,li code,td code{background:var(--card2);border:1px solid var(--line2);border-radius:6px;padding:1px 6px;font-size:12px}
-pre code{background:none;border:0;padding:0}
-
-/* ---------- table ---------- */
-.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin-top:16px}
+p code{background:var(--card2);border:1px solid var(--line2);border-radius:6px;padding:1px 6px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin-top:14px}
 table{width:100%;border-collapse:collapse}
-th,td{padding:12px 14px;text-align:left;font-size:13px;border-bottom:1px solid var(--line2)}
+th,td{padding:12px 14px;text-align:left;font-size:13.5px;border-bottom:1px solid var(--line2)}
 tr:last-child td{border-bottom:0}
-th{background:var(--card2);color:var(--ink);font-weight:700;font-size:12px}
-td{background:transparent;color:var(--ink2)}
-
-/* ---------- checklist ---------- */
-.checklist{display:grid;gap:8px;margin-top:14px}
-.check{
-  display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card2);border:1px solid var(--line2);
-  border-radius:var(--r2);color:var(--ink2);font-size:13.5px;
-}
-.check::before{
-  content:"";flex:none;width:18px;height:18px;border-radius:6px;background:var(--acbg);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233ecf9b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E");
-  background-size:12px;background-position:center;background-repeat:no-repeat;
-}
-
-.footer{color:var(--mut);font-size:12px;margin-top:34px;padding-top:20px;border-top:1px solid var(--line)}
-
-/* ---------- responsive ---------- */
-@media(max-width:900px){
-  .layout{grid-template-columns:1fr}
-  .sidebar{position:static;max-height:none;display:flex;flex-wrap:wrap;gap:4px}
-  .sidebar-title{width:100%}
-  .sidebar a.sub{padding-left:10px}
-}
-@media(max-width:650px){
-  .topbar{padding:0 14px}.badge{display:none}.brand small{display:none}
-  .wrap{padding:14px 14px 50px}
-  .hero h1{font-size:34px}
-  .measure-grid{grid-template-columns:1fr}
-  .card{padding:20px}
-}
+th{background:var(--card2);font-size:12px}td{color:var(--ink2)}
+.check{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-top:8px;background:var(--card2);border:1px solid var(--line2);border-radius:var(--r2);color:var(--ink2);cursor:pointer;user-select:none}
+.check input{accent-color:var(--ac);width:18px;height:18px;margin:0}
+.check:has(input:checked){color:var(--mut);text-decoration:line-through}
+.footer{color:var(--mut);font-size:12px;margin-top:30px;padding-top:18px;border-top:1px solid var(--line)}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{position:static;max-height:none;display:flex;flex-wrap:wrap;gap:4px}.sidebar b{width:100%}.sidebar a.sub{padding-left:10px}}
+@media(max-width:650px){.topbar{padding:0 14px}.wrap{padding:14px 14px 50px}.hero h1{font-size:32px}.grid{grid-template-columns:1fr}.card{padding:20px}}
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 <header class="topbar">
-  <div class="brand">
-    <div class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c0-6 4-4 7-7s2-7 7-7"/><circle cx="5" cy="19" r="1.6" fill="currentColor"/><circle cx="19" cy="5" r="1.6" fill="currentColor"/></svg></div>
-    <div class="brand-text"><div class="logo">EZ<span>PATH</span></div><small>Auton Guide · LemLib &amp; EZ-Template</small></div>
-  </div>
-  <div class="spacer"></div>
-  <div class="badge">V5RC · LEMLIB · EZ-TEMPLATE · PID · ODOMETRY</div>
-  <a class="btn" href="./EZPATH.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back to Planner</a>
+<div class="brand"><div class="mark"><svg viewBox="0 0 24 24"><path d="M5 19c0-6 4-4 7-7s2-7 7-7"/></svg></div><div class="logo">EZ<span>PATH</span></div></div>
+<div class="spacer"></div>
+<a class="btn" href="./EZPATH.html">← Planner</a>
 </header>
-<div class="wrap">
-<div class="layout">
+<div class="wrap"><div class="layout">
 <nav class="sidebar">
-<div class="sidebar-title">Tuning Guide</div>
-<a href="#start">Start Here</a>
-<a href="#measure">1. Measurements</a>
+<b>Guide</b>
+<a href="#start">Start</a>
+<a href="#measure">1. Measure</a>
 <a href="#odom">2. Odometry</a>
 <a href="#imu">3. IMU</a>
 <a href="#ez">4. EZ-Template</a>
-<a href="#ezpid" class="sub">EZ PID</a>
-<a href="#ezodom" class="sub">EZ Odom</a>
-<a href="#ezslew" class="sub">EZ Slew</a>
+<a class="sub" href="#ezpid">PID</a>
+<a class="sub" href="#ezodom">Odom</a>
+<a class="sub" href="#ezslew">Slew</a>
 <a href="#lemlib">5. LemLib</a>
-<a href="#lemlibcode" class="sub">LemLib Code</a>
-<a href="#lempid" class="sub">LemLib PID</a>
-<a href="#lemodom" class="sub">LemLib Odom</a>
-<a href="#testing">6. Testing</a>
-<a href="#trouble">7. Troubleshooting</a>
+<a class="sub" href="#lempid">PID</a>
+<a class="sub" href="#lemodom">Odom</a>
+<a href="#testing">6. Test order</a>
+<a href="#trouble">7. Fixes</a>
 <a href="#checklist">8. Checklist</a>
 </nav>
 <main>
-<!-- HERO -->
+
 <section class="hero" id="start">
-<span class="eyebrow">Companion guide</span>
 <h1>Robot <span>Tuning Guide</span></h1>
-<p>
-    Everything you need to understand the tuning process for a V5RC robot
-    using <b>LemLib</b> or <b>EZ-Template</b>.
-    Start with physical measurements, calibrate sensors, tune movement,
-    then build your autonomous.
-  </p>
-<div class="tags">
-<span>Physical Measurements</span>
-<span>Odometry</span>
-<span>IMU</span>
-<span>Tune drive PID</span>
-<span>Tune turn PID</span>
-<span>Slew</span>
-<span>LemLib</span>
-<span>EZ-Template</span>
-</div>
+<p>Measure the robot. Set up the sensors. Tune the movement. Then build your auton.</p>
 </section>
-<!-- MEASUREMENTS -->
+
 <section class="card" id="measure">
-<h2>1. Measure the robot before tuning</h2>
-<p>
-    This is one of the most important parts of tuning.
-    Your code needs to describe the physical robot accurately.
-    If the measurements are wrong, you can spend hours changing PID values
-    when the real problem is your geometry.
-  </p>
-<div class="measure-grid">
-<div class="measure">
-<strong>Drive wheel diameter</strong>
-<span>
-        Measure the effective diameter of the wheel actually contacting
-        the field. Wheel wear can make the effective diameter different
-        from the advertised size.
-      </span>
+<h2>1. Measure the robot</h2>
+<p>Your code must match the real robot. Wrong numbers can't be fixed with PID.</p>
+<div class="grid">
+<div><b>Drive wheel diameter</b>Measure the wheel on the field. Worn wheels can be smaller.</div>
+<div><b>Tracking wheel diameter</b>Measure the wheel your odometry uses.</div>
+<div><b>Tracking wheel offset</b>Distance from the wheel to the robot's center of turning.</div>
+<div><b>Track width</b>Distance between the left and right wheels.</div>
+<div><b>Robot width</b>Needed to plan paths that fit.</div>
+<div><b>Robot length</b>Front to back.</div>
 </div>
-<div class="measure">
-<strong>Tracking wheel diameter</strong>
-<span>
-        Measure the actual tracking wheel used by your odometry system.
-        Enter the value consistently in your odometry configuration.
-      </span>
-</div>
-<div class="measure">
-<strong>Tracking wheel offset</strong>
-<span>
-        Measure the perpendicular distance between the tracking wheel
-        and the robot's center of rotation.
-      </span>
-</div>
-<div class="measure">
-<strong>Wheelbase / track width</strong>
-<span>
-        Measure the distance between the left and right sides of the
-        drivetrain according to the geometry required by your framework.
-      </span>
-</div>
-<div class="measure">
-<strong>Robot width</strong>
-<span>
-        Measure the physical robot width. This matters when planning
-        paths and determining whether the robot can fit through spaces.
-      </span>
-</div>
-<div class="measure">
-<strong>Robot length</strong>
-<span>
-        Measure the robot's front-to-back length.
-      </span>
-</div>
-</div>
-<div class="warning">
-<b>Do not guess these numbers.</b>
-    If your wheel diameter is wrong, the robot can consistently travel
-    farther or shorter than the distance your software expects.
-  </div>
-<h3>Measurement rule</h3>
-<p>
-    Measure the same quantity several times and use a consistent method.
-    Write your measurements down before entering them into code.
-  </p>
+<div class="note warn"><b>Don't guess.</b> A wrong wheel size makes the robot drive too far or too short every time.</div>
+<p>Measure each one a few times. Write the numbers down before you type them in.</p>
 </section>
-<!-- ODOMETRY -->
+
 <section class="card" id="odom">
-<h2>2. Set up and test odometry</h2>
-<p>
-    Odometry estimates the robot's position using encoder/tracking-wheel
-    measurements and heading information. Good PID cannot fix incorrect
-    odometry geometry.
-  </p>
-<h3>Check these things</h3>
+<h2>2. Odometry</h2>
+<p>Odometry tracks where the robot is. Check these four things:</p>
 <div class="steps">
-<div class="step">
-<div class="num">1</div>
-<div>
-<b>Wheel diameter</b><br/>
-        The software needs to know how much distance corresponds to
-        one rotation of the wheel.
-      </div>
+<div class="step"><div class="num">1</div><div><b>Wheel diameter.</b> It sets how far one spin goes.</div></div>
+<div class="step"><div class="num">2</div><div><b>Wheel position.</b> Where the tracking wheel sits on the robot.</div></div>
+<div class="step"><div class="num">3</div><div><b>Sensor direction.</b> Forward should count up.</div></div>
+<div class="step"><div class="num">4</div><div><b>Heading.</b> Turn the robot and check the reading.</div></div>
 </div>
-<div class="step">
-<div class="num">2</div>
-<div>
-<b>Tracking wheel position</b><br/>
-        The framework needs to know where the tracking wheel is relative
-        to the robot's center of rotation.
-      </div>
-</div>
-<div class="step">
-<div class="num">3</div>
-<div>
-<b>Sensor direction</b><br/>
-        Positive encoder movement must correspond to the intended
-        direction of movement.
-      </div>
-</div>
-<div class="step">
-<div class="num">4</div>
-<div>
-<b>Heading</b><br/>
-        Verify the IMU orientation and make sure the robot's reported
-        heading changes in the expected direction.
-      </div>
-</div>
-</div>
-<div class="info">
-<b>Important:</b>
-    Odometry errors usually appear as consistent position errors.
-    Fix the physical configuration first before changing PID.
-  </div>
+<div class="note info"><b>Tip:</b> Fix odometry before you touch PID.</div>
 </section>
-<!-- IMU -->
+
 <section class="card" id="imu">
-<h2>3. Set up the IMU</h2>
-<p>
-    The IMU provides heading information used by both autonomous movement
-    and odometry systems.
-  </p>
+<h2>3. IMU</h2>
 <div class="steps">
-<div class="step">
-<div class="num">1</div>
-<div>
-<b>Mount it securely.</b>
-        The sensor should not move around on the robot.
-      </div>
+<div class="step"><div class="num">1</div><div><b>Mount it tight.</b> It must not wiggle.</div></div>
+<div class="step"><div class="num">2</div><div><b>Calibrate with the robot still.</b></div></div>
+<div class="step"><div class="num">3</div><div><b>Test turns.</b> Turn 90°, 180° and 360°. Compare to the reading.</div></div>
 </div>
-<div class="step">
-<div class="num">2</div>
-<div>
-<b>Calibrate while the robot is still.</b>
-        Don't move the robot while it calibrates.
-      </div>
-</div>
-<div class="step">
-<div class="num">3</div>
-<div>
-<b>Test a known turn.</b>
-        Rotate approximately 90°, 180°, and 360° and compare the reported
-        heading with the physical rotation.
-      </div>
-</div>
-</div>
-<div class="warning">
-    If the robot consistently turns too far or not far enough,
-    verify the IMU and framework configuration before aggressively
-    changing turn PID.
-  </div>
+<div class="note warn">If turns are always off, check the IMU first. Don't change turn PID yet.</div>
 </section>
-<!-- EZ TEMPLATE -->
+
 <section class="card" id="ez">
-<span class="framework ez">EZ-TEMPLATE</span>
-<h2>4. EZ-Template setup and tuning</h2>
-<p>
-    EZ-Template provides separate controls for drive PID, heading correction,
-    turning, odometry movement, slew, and other tuning constants.
-    Its documentation also provides a built-in PID tuner. 
-    
-  </p>
-<h3>Basic drive movement</h3>
+<span class="tag">EZ-TEMPLATE</span>
+<h2>4. EZ-Template</h2>
+<p>It has separate PID for driving, heading and turning. It also has a built-in PID tuner.</p>
+<h3>Drive</h3>
 <pre><code>chassis.pid_drive_set(24_in, 110);
 chassis.pid_wait();</code></pre>
-<p>
-    This gives the robot a distance target and speed limit.
-    EZ-Template documents the speed argument as 0–127. 
-    
-  </p>
+<p>That's a distance and a max speed (0–127).</p>
 </section>
-<!-- EZ PID -->
+
 <section class="card" id="ezpid">
-<span class="framework ez">EZ-TEMPLATE</span>
-<h2>EZ-Template PID tuning</h2>
-<p>
-    EZ-Template has separate constants for forward/backward drive,
-    heading correction, and turning. 
-  </p>
+<span class="tag">EZ-TEMPLATE</span>
+<h2>EZ PID</h2>
 <pre><code>void initialize() {
-
-  // Tune drive PID
-  chassis.pid_drive_constants_set(
-    10,    // P
-    0,     // I
-    100    // D
-  );
-
-  // Heading correction
-  chassis.pid_heading_constants_set(
-    3,     // P
-    0,     // I
-    20     // D
-  );
-
-  // Tune turn PID
-  chassis.pid_turn_constants_set(
-    3,     // P
-    0,     // I
-    20     // D
-  );
+  // Drive
+  chassis.pid_drive_constants_set(10, 0, 100);
+  // Heading
+  chassis.pid_heading_constants_set(3, 0, 20);
+  // Turn
+  chassis.pid_turn_constants_set(3, 0, 20);
 }</code></pre>
-<h3>What P, I, and D do</h3>
-<div class="table-wrap">
-<table>
-<tr>
-<th>Value</th>
-<th>Meaning</th>
-<th>Think of it as</th>
-</tr>
-<tr>
-<td>P</td>
-<td>How strongly the robot reacts to the error</td>
-<td>"How far am I from the target?"</td>
-</tr>
-<tr>
-<td>I</td>
-<td>How much the error has built up</td>
-<td>"Have I been off for a while?"</td>
-</tr>
-<tr>
-<td>D</td>
-<td>How quickly the robot is approaching the target</td>
-<td>"Am I moving toward the target too fast?"</td>
-</tr>
-</table>
-</div>
-<div class="tip">
-    A common tuning approach is to establish useful P response first,
-    add D to control overshoot/oscillation, and only introduce I when
-    persistent error actually requires it.
-  </div>
+<div class="tw"><table>
+<tr><th>Term</th><th>What it does</th></tr>
+<tr><td>P</td><td>Pushes harder when far from the target.</td></tr>
+<tr><td>I</td><td>Adds push if you stay off target.</td></tr>
+<tr><td>D</td><td>Slows you down as you get close.</td></tr>
+</table></div>
+<div class="note">Set P first. Add D to stop overshoot. Only add I if you really need it.</div>
 </section>
-<!-- EZ ODOM -->
+
 <section class="card" id="ezodom">
-<span class="framework ez">EZ-TEMPLATE</span>
-<h2>EZ-Template odometry</h2>
-<p>
-    EZ-Template supports odometry-based movement and XY point-to-point
-    movement. Its odometry system uses movement and angular PID loops,
-    with separate angular and boomerang constants available. 
-    
-  </p>
+<span class="tag">EZ-TEMPLATE</span>
+<h2>EZ Odom</h2>
 <pre><code>void autonomous() {
-
   chassis.pid_targets_reset();
-
   chassis.drive_imu_reset();
-
   chassis.drive_sensor_reset();
+  chassis.odom_xyt_set(0_in, 0_in, 0_deg);
+  chassis.drive_brake_set(MOTOR_BRAKE_HOLD);
 
-  chassis.odom_xyt_set(
-    0_in,
-    0_in,
-    0_deg
-  );
-
-  chassis.drive_brake_set(
-    MOTOR_BRAKE_HOLD
-  );
-
-  chassis.pid_odom_set(
-    {{24_in, 24_in}, ez::fwd, 110}
-  );
-
+  chassis.pid_odom_set({{24_in, 24_in}, ez::fwd, 110});
   chassis.pid_wait();
 }</code></pre>
-<h3>EZ-Template coordinates</h3>
-<p>
-    By default, EZ-Template's odometry coordinate system starts at
-    (0,0) and 0 degrees. Its documentation defines right as positive X,
-    forward as positive Y, and clockwise as positive theta. 
-    
-  </p>
-<div class="warning">
-    Make sure the coordinate system you use in EZPATH matches the coordinate
-    system used by your autonomous code.
-  </div>
+<p>Start is (0, 0) at 0°. Right is +X. Forward is +Y. Clockwise is +theta.</p>
+<div class="note warn">Check that the planner's axes match your code.</div>
 </section>
-<!-- EZ SLEW -->
+
 <section class="card" id="ezslew">
-<span class="framework ez">EZ-TEMPLATE</span>
-<h2>EZ-Template slew</h2>
-<p>
-    Slew limits how quickly the commanded speed increases. It can make
-    acceleration smoother and reduce sudden changes in motor output.
-    EZ-Template allows slew to be enabled globally or for individual
-    movements. 
-  </p>
+<span class="tag">EZ-TEMPLATE</span>
+<h2>EZ Slew</h2>
+<p>Slew limits how fast speed ramps up. It gives smoother starts.</p>
 <pre><code>chassis.slew_drive_set(true);
-
-chassis.slew_drive_constants_set(
-  5_in,
-  50
-);
-
-chassis.pid_drive_set(
-  24_in,
-  110
-);
-
+chassis.slew_drive_constants_set(5_in, 50);
+chassis.pid_drive_set(24_in, 110);
 chassis.pid_wait();</code></pre>
-<div class="info">
-    Tune your basic movement first. Do not use slew to hide a badly tuned
-    PID controller.
-  </div>
+<div class="note info">Tune PID first. Don't use slew to hide bad PID.</div>
 </section>
-<!-- LEMLIB -->
-<section class="card" id="lemlib"><span id="lemlibcode" style="display:block;position:relative;top:-80px;visibility:hidden;"></span>
-<span class="framework lemlib">LEMLIB</span>
-<h2>5. LemLib setup and tuning</h2>
-<p>
-    LemLib uses a similar overall tuning philosophy:
-    accurately configure the physical robot, configure sensors and
-    odometry, then tune the movement controllers.
-  </p>
-<h3>Physical configuration</h3>
+
+<section class="card" id="lemlib">
+<span class="tag lem">LEMLIB</span>
+<h2>5. LemLib</h2>
+<p>Same plan: set up the robot, set up sensors, then tune.</p>
 <div class="steps">
-<div class="step">
-<div class="num">1</div>
-<div>
-<b>Set up the drivetrain motors.</b><br/>
-        Verify motor ports, directions, cartridge/gear configuration,
-        and which motors belong to each side.
-      </div>
+<div class="step"><div class="num">1</div><div><b>Motors.</b> Check ports, directions and gearing.</div></div>
+<div class="step"><div class="num">2</div><div><b>Tracking wheels.</b> Enter diameter and offset.</div></div>
+<div class="step"><div class="num">3</div><div><b>IMU.</b> Mount it and match the code.</div></div>
+<div class="step"><div class="num">4</div><div><b>Chassis.</b> Put it all together.</div></div>
 </div>
-<div class="step">
-<div class="num">2</div>
-<div>
-<b>Set up the tracking wheels.</b><br/>
-        Enter the wheel diameter and the appropriate tracking-wheel
-        position/offset.
-      </div>
-</div>
-<div class="step">
-<div class="num">3</div>
-<div>
-<b>Set up the IMU.</b><br/>
-        Make sure the sensor is mounted securely and its orientation
-        matches your code.
-      </div>
-</div>
-<div class="step">
-<div class="num">4</div>
-<div>
-<b>Create the chassis.</b><br/>
-        Combine your drivetrain, odometry sensors, and controller
-        settings into the LemLib chassis configuration.
-      </div>
-</div>
-</div>
-
-<h3>Basic LemLib setup</h3>
-<p>This is the main setup. Change the motor ports, wheel sizes, offsets, and PID numbers to match your robot.</p>
+<h3>Setup</h3>
+<p>Change the ports, sizes and offsets to match your robot.</p>
 <pre><code>// Drivetrain
-    lemlib::Drivetrain drivetrain(
-        &amp;leftMotors,
-        &amp;rightMotors,
-        11.5,                          // track width
-        lemlib::Omniwheel::NEW_275,    // wheel
-        450,                            // wheel RPM
-        2                               // horizontal drift
-    );
+lemlib::Drivetrain drivetrain(
+    &amp;leftMotors,
+    &amp;rightMotors,
+    11.5,                          // track width
+    lemlib::Omniwheel::NEW_275,    // wheel
+    450,                           // wheel RPM
+    2                              // horizontal drift
+);
 
-    // IMU
-    pros::Imu imu(6);
+// IMU
+pros::Imu imu(6);
 
-    // Tracking wheel
-    pros::Rotation verticalEncoder(5);
-    lemlib::TrackingWheel vertical(
-        &amp;verticalEncoder,
-        lemlib::Omniwheel::NEW_275,
-        -2.5                         // offset
-    );
+// Tracking wheel
+pros::Rotation verticalEncoder(5);
+lemlib::TrackingWheel vertical(
+    &amp;verticalEncoder,
+    lemlib::Omniwheel::NEW_275,
+    -2.5                           // offset
+);
 
-    // Odometry sensors
-    lemlib::OdomSensors sensors(
-        &amp;vertical,    // vertical wheel 1
-        nullptr,      // vertical wheel 2
-        nullptr,      // horizontal wheel 1
-        nullptr,      // horizontal wheel 2
-        &amp;imu           // IMU
-    );</code></pre>
-<h3>LemLib PID settings</h3>
-<p>LemLib uses one controller for forward/backward movement and one for turning.</p>
+// Odometry sensors
+lemlib::OdomSensors sensors(
+    &amp;vertical,  // vertical 1
+    nullptr,    // vertical 2
+    nullptr,    // horizontal 1
+    nullptr,    // horizontal 2
+    &amp;imu
+);</code></pre>
+<h3>PID</h3>
+<p>One controller for driving. One for turning.</p>
 <pre><code>// Forward / backward
-    lemlib::ControllerSettings lateral_controller(
-        10,   // kP
-        0,    // kI
-        3,    // kD
-        3,    // anti-windup
-        1,    // small error range
-        100,  // small error timeout
-        3,    // large error range
-        500,  // large error timeout
-        20    // slew
-    );
+lemlib::ControllerSettings lateral_controller(
+    10,   // kP
+    0,    // kI
+    3,    // kD
+    3,    // anti-windup
+    1,    // small error range
+    100,  // small error timeout
+    3,    // large error range
+    500,  // large error timeout
+    20    // slew
+);
 
-    // Turning
-    lemlib::ControllerSettings angular_controller(
-        2,    // kP
-        0,    // kI
-        10,   // kD
-        3,    // anti-windup
-        1,    // small error range
-        100,  // small error timeout
-        3,    // large error range
-        500,  // large error timeout
-        0     // slew
-    );
+// Turning
+lemlib::ControllerSettings angular_controller(
+    2,    // kP
+    0,    // kI
+    10,   // kD
+    3,    // anti-windup
+    1,    // small error range
+    100,  // small error timeout
+    3,    // large error range
+    500,  // large error timeout
+    0     // slew
+);
 
-    // Create chassis
-    lemlib::Chassis chassis(
-        drivetrain,
-        lateral_controller,
-        angular_controller,
-        sensors
-    );</code></pre>
-<h3>Initialize the robot</h3>
-<p>Calibrate the sensors when the program starts.</p>
+lemlib::Chassis chassis(
+    drivetrain,
+    lateral_controller,
+    angular_controller,
+    sensors
+);</code></pre>
+<div class="note info">These numbers are only a start. Tune them for your robot.</div>
+<h3>Calibrate</h3>
 <pre><code>void initialize() {
-        chassis.calibrate();
-    }</code></pre>
-<div class="info">
-<b>Important:</b> The PID numbers above are example starting values, not universal values. Tune them for your robot.
-    </div>
-<h3>Simple autonomous movement</h3>
-<p>These are the basic LemLib commands you will use to move the robot.</p>
+    chassis.calibrate();
+}</code></pre>
+<h3>Move</h3>
 <pre><code>void autonomous() {
-        // Start at the correct position
-        chassis.setPose(0, 0, 0);
-
-        // Drive forward
-        chassis.moveToPoint(0, 24, 3000);
-
-        // Turn to 90 degrees
-        chassis.turnToHeading(90, 2000);
-
-        // Move to another point
-        chassis.moveToPoint(24, 24, 3000);
-
-        // Wait until the movement is finished
-        chassis.waitUntilDone();
-    }</code></pre>
-<h3>Set the starting position</h3>
-<p>Set the robot's starting X, Y, and heading before running your autonomous.</p>
-<pre><code>chassis.setPose(
-        0,    // X
-        0,    // Y
-        0     // heading
-    );</code></pre>
-<h3>Go to a point</h3>
-<p><code>moveToPoint()</code> moves the robot toward an X/Y coordinate.</p>
-<pre><code>chassis.moveToPoint(
-        24,    // X
-        12,    // Y
-        3000   // timeout in ms
-    );</code></pre>
-<h3>Turn to a heading</h3>
-<p><code>turnToHeading()</code> turns the robot to a specific field heading.</p>
-<pre><code>chassis.turnToHeading(
-        90,    // heading
-        2000   // timeout in ms
-    );</code></pre>
-<h3>Get the robot's position</h3>
-<p>You can read the current X, Y, and heading from the chassis pose.</p>
+    chassis.setPose(0, 0, 0);          // start X, Y, heading
+    chassis.moveToPoint(0, 24, 3000);  // X, Y, timeout (ms)
+    chassis.turnToHeading(90, 2000);   // heading, timeout (ms)
+    chassis.moveToPoint(24, 24, 3000);
+    chassis.waitUntilDone();
+}</code></pre>
+<h3>Read position</h3>
 <pre><code>lemlib::Pose pose = chassis.getPose();
-
 double x = pose.x;
 double y = pose.y;
 double heading = pose.theta;</code></pre>
-<div class="tip">
-<b>Easy way to think about LemLib:</b> set up the robot → calibrate → set the starting pose → move to points → turn → test → tune.
-    </div>
 </section>
-<!-- LEMLIB PID -->
+
 <section class="card" id="lempid">
-<span class="framework lemlib">LEMLIB</span>
-<h2>LemLib PID tuning</h2>
-<p>
-    The important idea is the same as EZ-Template:
-    PID constants control how aggressively the robot reacts to error,
-    how accumulated error is handled, and how motion is damped.
-  </p>
-<h3>Tune one thing at a time</h3>
+<span class="tag lem">LEMLIB</span>
+<h2>LemLib PID</h2>
+<p>Tune one thing at a time:</p>
 <div class="steps">
-<div class="step">
-<div class="num">1</div>
-<div>
-<b>Tune straight driving first.</b><br/>
-        Test a simple straight drive.
-      </div>
+<div class="step"><div class="num">1</div><div><b>Straight driving.</b></div></div>
+<div class="step"><div class="num">2</div><div><b>Turning.</b> Try 90° and 180°.</div></div>
+<div class="step"><div class="num">3</div><div><b>Staying straight.</b></div></div>
+<div class="step"><div class="num">4</div><div><b>Point to point.</b></div></div>
 </div>
-<div class="step">
-<div class="num">2</div>
-<div>
-<b>Tune turning.</b><br/>
-        Test simple turns like 90° and 180°.
-      </div>
-</div>
-<div class="step">
-<div class="num">3</div>
-<div>
-<b>Tune heading correction.</b><br/>
-        Make sure the robot can stay straight.
-      </div>
-</div>
-<div class="step">
-<div class="num">4</div>
-<div>
-<b>Tune point-to-point movement.</b><br/>
-        Do this after basic movement works well.
-      </div>
-</div>
-</div>
-<div class="tip">
-    If your robot drives straight correctly but turns poorly,
-    do not immediately change the drive PID. The turn controller and
-    heading/sensor configuration should be investigated separately.
-  </div>
-
-<h3>Basic LemLib movement test</h3>
+<div class="note">Drives fine but turns badly? Leave drive PID alone. Check turn PID and the IMU.</div>
 <pre><code>void autonomous() {
-        chassis.setPose(0, 0, 0);
-
-        // Test straight driving first
-        chassis.moveToPoint(0, 24, 3000);
-        chassis.waitUntilDone();
-
-        // Then test a turn
-        chassis.turnToHeading(90, 2000);
-        chassis.waitUntilDone();
-    }</code></pre>
-<div class="info">
-<b>Tuning order:</b> get straight driving working → tune turning → check heading → tune point-to-point movement.
-    </div>
+    chassis.setPose(0, 0, 0);
+    chassis.moveToPoint(0, 24, 3000);
+    chassis.waitUntilDone();
+    chassis.turnToHeading(90, 2000);
+    chassis.waitUntilDone();
+}</code></pre>
 </section>
-<!-- LEMLIB ODOM -->
+
 <section class="card" id="lemodom">
-<span class="framework lemlib">LEMLIB</span>
-<h2>LemLib odometry</h2>
-<p>
-    The most important part of LemLib odometry is accurate physical
-    geometry. Your software needs to know how far the tracking wheels
-    move and where those wheels are located relative to the robot.
-  </p>
-<h3>Odometry test</h3>
+<span class="tag lem">LEMLIB</span>
+<h2>LemLib Odom</h2>
+<p>Good odometry needs correct wheel sizes and offsets.</p>
 <div class="steps">
-<div class="step">
-<div class="num">1</div>
-<div>
-        Put the robot at a known starting point.
-      </div>
+<div class="step"><div class="num">1</div><div>Put the robot on a known spot.</div></div>
+<div class="step"><div class="num">2</div><div>Reset the position in code.</div></div>
+<div class="step"><div class="num">3</div><div>Drive a distance you know.</div></div>
+<div class="step"><div class="num">4</div><div>Compare the code's position to the real one.</div></div>
+<div class="step"><div class="num">5</div><div>Repeat in another direction.</div></div>
 </div>
-<div class="step">
-<div class="num">2</div>
-<div>
-        Reset the robot's position in code.
-      </div>
-</div>
-<div class="step">
-<div class="num">3</div>
-<div>
-        Drive a distance you already know.
-      </div>
-</div>
-<div class="step">
-<div class="num">4</div>
-<div>
-        Compare the position shown by the code to the real position.
-      </div>
-</div>
-<div class="step">
-<div class="num">5</div>
-<div>
-        Try the test in another direction.
-      </div>
-</div>
-</div>
-<div class="warning">
-    If the error grows as the robot travels farther, investigate your
-    wheel diameter/calibration. If the robot's position becomes wrong
-    mainly during turns, investigate tracking-wheel offsets and heading
-    information.
-  </div>
+<div class="note warn">Error grows with distance? Check wheel diameter. Error appears in turns? Check offsets and heading.</div>
+<h3>LemLib vs EZ-Template</h3>
+<p>Don't copy PID numbers between them.</p>
+<div class="tw"><table>
+<tr><th>Idea</th><th>EZ-Template</th><th>LemLib</th></tr>
+<tr><td>Drive</td><td>Drive PID</td><td>Lateral controller</td></tr>
+<tr><td>Turn</td><td>Turn PID</td><td>Angular controller</td></tr>
+<tr><td>Heading</td><td>Heading PID</td><td>Built in</td></tr>
+<tr><td>Paths</td><td>Odom / Boomerang / PP</td><td>moveToPoint, moveToPose</td></tr>
+<tr><td>Ramp up</td><td>Slew</td><td>Controller slew</td></tr>
+</table></div>
 </section>
-<!-- COMPARISON -->
-<section class="card">
-<h2>LemLib vs EZ-Template</h2>
-<p>
-    Both frameworks can accomplish the same overall tuning workflow.
-    The API and names are different, so don't copy constants directly
-    from one framework into the other.
-  </p>
-<div class="table-wrap">
-<table>
-<tr>
-<th>Concept</th>
-<th>EZ-Template</th>
-<th>LemLib</th>
-</tr>
-<tr>
-<td>Drive control</td>
-<td>Tune drive PID</td>
-<td>Drive controller</td>
-</tr>
-<tr>
-<td>Turning</td>
-<td>Tune turn PID</td>
-<td>Turn controller</td>
-</tr>
-<tr>
-<td>Heading correction</td>
-<td>Heading PID</td>
-<td>Heading control</td>
-</tr>
-<tr>
-<td>Odometry</td>
-<td>EZ odometry</td>
-<td>LemLib odometry</td>
-</tr>
-<tr>
-<td>Path movement</td>
-<td>Odom / Boomerang / PP</td>
-<td>Chassis movement functions</td>
-</tr>
-<tr>
-<td>Acceleration limiting</td>
-<td>Slew</td>
-<td>Movement/controller configuration</td>
-</tr>
-</table>
-</div>
-<div class="info">
-<b>Important:</b> PID values are framework- and robot-dependent.
-    A Kp value that works on one robot should not automatically be copied
-    to another robot.
-  </div>
-</section>
-<!-- TESTING -->
+
 <section class="card" id="testing">
-<h2>6. Testing order</h2>
-<p>
-    Use this order. It prevents you from trying to solve an odometry problem
-    with PID or a mechanical problem with software.
-  </p>
+<h2>6. Test order</h2>
 <div class="steps">
-<div class="step">
-<div class="num">1</div>
-<div>
-<b>Check the robot</b><br/>
-        Wheels, axles, drivetrain alignment, tracking wheels and sensor
-        mounting.
-      </div>
-</div>
-<div class="step">
-<div class="num">2</div>
-<div>
-<b>Measure the robot</b><br/>
-        Measure wheel diameters, offsets, robot size, and drivetrain setup.
-      </div>
-</div>
-<div class="step">
-<div class="num">3</div>
-<div>
-<b>Check sensors</b><br/>
-        Make sure encoders and the IMU move in the correct direction.
-      </div>
-</div>
-<div class="step">
-<div class="num">4</div>
-<div>
-<b>Check odometry</b><br/>
-        Make sure the reported position matches where the robot actually is.
-      </div>
-</div>
-<div class="step">
-<div class="num">5</div>
-<div>
-<b>Tune drive PID</b><br/>
-        Tune straight driving.
-      </div>
-</div>
-<div class="step">
-<div class="num">6</div>
-<div>
-<b>Tune turn PID</b><br/>
-        Tune turns.
-      </div>
-</div>
-<div class="step">
-<div class="num">7</div>
-<div>
-<b>Tune point-to-point</b><br/>
-        Tune movement between field points.
-      </div>
-</div>
-<div class="step">
-<div class="num">8</div>
-<div>
-<b>Build the autonomous</b><br/>
-        Once everything else works, tune the full autonomous.
-      </div>
-</div>
+<div class="step"><div class="num">1</div><div><b>Check the robot.</b> Wheels, axles, sensor mounts.</div></div>
+<div class="step"><div class="num">2</div><div><b>Measure it.</b></div></div>
+<div class="step"><div class="num">3</div><div><b>Check sensors.</b> Right direction?</div></div>
+<div class="step"><div class="num">4</div><div><b>Check odometry.</b></div></div>
+<div class="step"><div class="num">5</div><div><b>Tune drive PID.</b></div></div>
+<div class="step"><div class="num">6</div><div><b>Tune turn PID.</b></div></div>
+<div class="step"><div class="num">7</div><div><b>Tune point to point.</b></div></div>
+<div class="step"><div class="num">8</div><div><b>Build the auton.</b></div></div>
 </div>
 </section>
-<!-- TROUBLESHOOTING -->
+
 <section class="card" id="trouble">
-<h2>7. Troubleshooting</h2>
-<div class="table-wrap">
-<table>
-<tr>
-<th>Problem</th>
-<th>Check first</th>
-</tr>
-<tr>
-<td>Robot travels too far</td>
-<td>Wheel diameter / distance calibration</td>
-</tr>
-<tr>
-<td>Robot travels too short</td>
-<td>Wheel diameter / distance calibration</td>
-</tr>
-<tr>
-<td>Robot drives in an arc</td>
-<td>Drivetrain alignment, motor configuration, heading correction</td>
-</tr>
-<tr>
-<td>Robot overshoots</td>
-<td>PID response and damping</td>
-</tr>
-<tr>
-<td>Robot oscillates</td>
-<td>PID response / excessive gain</td>
-</tr>
-<tr>
-<td>Robot stops short</td>
-<td>PID gains, exit conditions, friction, mechanical resistance</td>
-</tr>
-<tr>
-<td>90° turn is inaccurate</td>
-<td>IMU, drivetrain geometry, turn controller</td>
-</tr>
-<tr>
-<td>Position gets worse after turns</td>
-<td>Tracking-wheel offsets and heading calibration</td>
-</tr>
-<tr>
-<td>Autonomous changes between runs</td>
-<td>Mechanical consistency, battery, wheel slip, sensor mounting</td>
-</tr>
-</table>
-</div>
+<h2>7. Fixes</h2>
+<div class="tw"><table>
+<tr><th>Problem</th><th>Check first</th></tr>
+<tr><td>Goes too far or too short</td><td>Wheel diameter</td></tr>
+<tr><td>Drives in an arc</td><td>Drivetrain alignment, motor setup, heading</td></tr>
+<tr><td>Overshoots</td><td>More D, less P</td></tr>
+<tr><td>Shakes back and forth</td><td>P is too high</td></tr>
+<tr><td>Stops short</td><td>Gains, exit settings, friction</td></tr>
+<tr><td>90° turn is off</td><td>IMU, track width, turn PID</td></tr>
+<tr><td>Position drifts after turns</td><td>Tracking offsets, heading</td></tr>
+<tr><td>Different every run</td><td>Battery, wheel slip, loose sensors</td></tr>
+</table></div>
 </section>
-<!-- FINAL CHECKLIST -->
+
 <section class="card" id="checklist">
-<h2>8. Final tuning checklist</h2>
-<div class="checklist">
-<div class="check">
-      Drive wheel diameter measured.
-    </div>
-<div class="check">
-      Tracking wheel diameter measured.
-    </div>
-<div class="check">
-      Tracking wheel offsets measured.
-    </div>
-<div class="check">
-      Motor ports and directions are correct.
-    </div>
-<div class="check">
-      IMU is secure and calibrated.
-    </div>
-<div class="check">
-      Robot can drive a known distance accurately.
-    </div>
-<div class="check">
-      Robot can turn to known angles accurately.
-    </div>
-<div class="check">
-      Odometry matches the real robot.
-    </div>
-<div class="check">
-      Tune drive PID has been tuned independently from turn PID.
-    </div>
-<div class="check">
-      Tune point-to-point has been tested.
-    </div>
-<div class="check">
-      Autonomous tested multiple times.
-    </div>
-<div class="check">
-      Final PID/settings were saved and backed up.
-    </div>
-</div>
-<div class="success">
-<b>EZPATH principle:</b>
-    Measure → Configure → Calibrate → Tune → Test → Repeat.
-    Don't randomly change constants until the robot "looks better."
-  </div>
+<h2>8. Checklist</h2>
+<label class="check"><input type="checkbox">Drive wheel measured</label>
+<label class="check"><input type="checkbox">Tracking wheel measured</label>
+<label class="check"><input type="checkbox">Tracking offsets measured</label>
+<label class="check"><input type="checkbox">Motor ports and directions correct</label>
+<label class="check"><input type="checkbox">IMU mounted and calibrated</label>
+<label class="check"><input type="checkbox">Drives a known distance</label>
+<label class="check"><input type="checkbox">Turns to known angles</label>
+<label class="check"><input type="checkbox">Odometry matches the real robot</label>
+<label class="check"><input type="checkbox">Drive and turn PID tuned separately</label>
+<label class="check"><input type="checkbox">Point to point tested</label>
+<label class="check"><input type="checkbox">Auton run many times</label>
+<label class="check"><input type="checkbox">Settings saved and backed up</label>
+<div class="note"><b>Remember:</b> Measure, set up, calibrate, tune, test. Don't change numbers at random.</div>
 </section>
-<div class="footer">
-  EZPATH — LemLib &amp; EZ-Template tuning companion guide.
-  Technical references: EZ-Template documentation and LemLib documentation.
-</div>
+
+<div class="footer">Based on the EZ-Template and LemLib docs.</div>
 </main>
-</div>
-</div>
+</div></div>
 <script>
-(() => {
-  const links = [...document.querySelectorAll(".sidebar a")];
-  const map = new Map(links.map(a => [a.getAttribute("href").slice(1), a]));
-  const targets = [...map.keys()].map(id => document.getElementById(id)).filter(Boolean);
-  if (!("IntersectionObserver" in window)) return;
-  const io = new IntersectionObserver(es => {
-    es.forEach(e => { if (e.isIntersecting) {
-      links.forEach(l => l.classList.remove("active"));
-      const l = map.get(e.target.id); if (l) l.classList.add("active");
-    }});
-  }, {rootMargin:"-90px 0px -65% 0px"});
-  targets.forEach(t => io.observe(t));
+(()=>{
+const links=[...document.querySelectorAll(".sidebar a")];
+const map=new Map(links.map(a=>[a.getAttribute("href").slice(1),a]));
+if(!("IntersectionObserver" in window))return;
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove("active"));const l=map.get(e.target.id);if(l)l.classList.add("active")}})},{rootMargin:"-90px 0px -65% 0px"});
+[...map.keys()].map(id=>document.getElementById(id)).filter(Boolean).forEach(t=>io.observe(t));
 })();
 </script>
 </body>
