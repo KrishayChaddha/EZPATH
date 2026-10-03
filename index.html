@@ -1273,6 +1273,40 @@ body #simScrub{flex:1;min-width:180px;width:auto!important}
 
 <body>
 
+<style>
+body:not(.sim-mode) #simOverlay{display:none!important}
+body.dock-hidden #simDock{transform:translateY(110%)!important}
+#dockShow{position:fixed;right:16px;bottom:16px;z-index:60;display:none;height:36px;padding:0 14px;border-radius:10px;background:var(--ac);color:var(--acink);border:0;font-weight:700;cursor:pointer}
+body.sim-mode.dock-hidden #dockShow{display:block}
+</style>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const hide=document.createElement("button");
+hide.id="dockHide";hide.textContent="Hide bar";
+$("sExit").before(hide);
+const show=document.createElement("button");
+show.id="dockShow";show.textContent="Show controls";
+document.body.appendChild(show);
+const toggle=v=>{
+  document.body.classList.toggle("dock-hidden",v);
+  setTimeout(()=>window.dispatchEvent(new Event("resize")),50);
+};
+hide.onclick=()=>toggle(true);
+show.onclick=()=>toggle(false);
+addEventListener("keydown",e=>{
+  if(!document.body.classList.contains("sim-mode"))return;
+  if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
+  if(e.key==="h"||e.key==="H")toggle(!document.body.classList.contains("dock-hidden"));
+});
+$("sExit").addEventListener("click",()=>{
+  document.body.classList.remove("dock-hidden");
+  const o=$("simOverlay"),c=o.getContext("2d");
+  c.save();c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,o.width,o.height);c.restore();
+});
+})();
+</script>
+
 <!-- =====================================================
      HEADER
 ===================================================== -->
@@ -5041,6 +5075,48 @@ $("sImport").onclick = () => { const s = prompt("Paste a share code or JSON — 
   try { const o = JSON.parse(s.trim().startsWith("{") ? s : decodeURIComponent(escape(atob(s.trim())))); load(o, confirm("OK = replace MY paths with these.\nCancel = add them as ALLY paths.")); } catch { alert("Couldn't read that code."); } };
 $("sFile").onchange = e => { const f = e.target.files[0]; if (!f) return; f.text().then(s => { try { load(JSON.parse(s), confirm("OK = replace MY paths with these.\nCancel = add them as ALLY paths.")); } catch { alert("Invalid JSON file."); } }); e.target.value = ""; };
 })();
+</script>
+
+
+<!-- Added: simulator bar hide/show control only -->
+<style>
+#dockHide{background:var(--card)!important;border:1px solid var(--line)!important;color:var(--ink)!important;border-radius:var(--r2)!important;font-weight:600;height:32px;padding:0 10px;cursor:pointer}
+#dockHide:hover{background:var(--hover)!important}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const dock=document.getElementById("simDock");
+  const exit=document.getElementById("sExit");
+  if(!dock || !exit) return;
+
+  const hide=document.getElementById("dockHide") || document.createElement("button");
+  hide.id="dockHide";
+  hide.textContent="Hide bar";
+  if(!hide.parentNode) exit.before(hide);
+
+  const show=document.getElementById("dockShow") || document.createElement("button");
+  show.id="dockShow";
+  show.textContent="Show controls";
+  document.body.appendChild(show);
+
+  const toggle=v=>{
+    document.body.classList.toggle("dock-hidden",v);
+    setTimeout(()=>window.dispatchEvent(new Event("resize")),50);
+  };
+
+  hide.onclick=()=>toggle(true);
+  show.onclick=()=>toggle(false);
+
+  exit.addEventListener("click",()=>{
+    document.body.classList.remove("dock-hidden");
+  });
+
+  window.addEventListener("keydown",e=>{
+    if(!document.body.classList.contains("sim-mode")) return;
+    if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+    if(e.key==="h"||e.key==="H") toggle(!document.body.classList.contains("dock-hidden"));
+  });
+});
 </script>
 
 </body>
